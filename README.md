@@ -1,8 +1,8 @@
-## tutor-flow
+# tutor-flow
 A pdf to short-notes, flash-cards, QnA generator 
 
 
-# Getting Started
+## Getting Started
 
 First, run the development server:
 
