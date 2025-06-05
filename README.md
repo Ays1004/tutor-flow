@@ -1,6 +1,8 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## tutor-flow
+A pdf to short-notes, flash-cards, QnA generator 
 
-## Getting Started
+
+# Getting Started
 
 First, run the development server:
 
