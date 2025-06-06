@@ -41,7 +41,7 @@ export async function POST(request: Request) {
       {
         model: 'llama3-8b-8192',
         messages: [
-          { role: 'system', content: 'You are a helpful assistant.' },
+          { role: 'system', content: 'You are a helpful assistant, Based on the following parsed question paper data, extract all the important topics and concepts that are frequently asked or critical for exam preparation. Prioritize repeated themes, high-weightage areas, and key concepts. List them clearly and concisely without any introduction or conclusion.' },
           { role: 'user', content: `Summarize the following academic text:\n\n${text}` },
         ],
       },
