@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server';
 import PDFParser from 'pdf2json';
+import axios from 'axios';
+
+const GROQ_API_KEY = process.env.GROQ_API_KEY;
 
 export async function POST(request: Request) {
   try {
@@ -21,7 +24,6 @@ export async function POST(request: Request) {
       const pdfParser = new PDFParser();
       pdfParser.on('pdfParser_dataError', errData => reject(errData.parserError));
       pdfParser.on('pdfParser_dataReady', pdfData => {
-        // Extract text from all pages
         const pages = pdfData.Pages;
         const allText = pages.map((page: any) =>
           page.Texts.map((t: any) =>
@@ -33,17 +35,32 @@ export async function POST(request: Request) {
       pdfParser.parseBuffer(buffer);
     });
 
-    return NextResponse.json({
-      text,
-      // pdf2json does not provide numPages or info directly
-      numPages: undefined,
-      info: undefined
-    });
+    // Call Groq API for summarization
+    const groqRes = await axios.post(
+      'https://api.groq.com/openai/v1/chat/completions',
+      {
+        model: 'llama3-8b-8192',
+        messages: [
+          { role: 'system', content: 'You are a helpful assistant.' },
+          { role: 'user', content: `Summarize the following academic text:\n\n${text}` },
+        ],
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${GROQ_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    const summary = groqRes.data.choices[0].message.content;
+
+    return NextResponse.json({ summary });
 
   } catch (error) {
-    console.error('PDF processing error:', error);
+    console.error('PDF processing or summarization error:', error);
     return NextResponse.json({
-      error: 'Failed to process PDF file',
+      error: 'Failed to process PDF file or summarize content',
       details: error instanceof Error ? error.message : String(error)
     }, { status: 500 });
   }

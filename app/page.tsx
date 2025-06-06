@@ -4,11 +4,7 @@ import { FileUpload } from "@/components/ui/file-upload";
 
 export default function Home() {
   const [file, setFile] = useState<File | null>(null);
-  const [pdfContent, setPdfContent] = useState<{
-    text: string;
-    numPages: number;
-    info: any;
-  } | null>(null);
+  const [summary, setSummary] = useState<string | null>(null);
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState(false);
 
@@ -21,7 +17,8 @@ export default function Home() {
 
       setFile(uploadedFile);
       setLoading(true);
-      
+      setSummary(null);
+
       const formData = new FormData();
       formData.append('file', uploadedFile);
 
@@ -35,7 +32,7 @@ export default function Home() {
       }
 
       const data = await response.json();
-      setPdfContent(data);
+      setSummary(data.summary);
       setError("");
     } catch (err) {
       setError("Failed to process PDF file");
@@ -50,12 +47,11 @@ export default function Home() {
       <FileUpload onChange={handleFile} />
       {error && <p className="text-red-500 mt-2">{error}</p>}
       {loading && <p className="mt-2">Processing PDF...</p>}
-      {pdfContent && (
+      {summary && (
         <div className="mt-4">
-          <h2 className="text-lg font-semibold mb-2">PDF Content</h2>
-          <p className="mb-2">Number of pages: {pdfContent.numPages}</p>
-          <div className="whitespace-pre-wrap border p-4 rounded-md">
-            {pdfContent.text}
+          <h2 className="text-lg font-semibold mb-2">Summary</h2>
+          <div className="whitespace-pre-wrap border p-4 rounded-md bg-neutral-50 dark:bg-neutral-900">
+            {summary}
           </div>
         </div>
       )}
