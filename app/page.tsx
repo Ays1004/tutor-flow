@@ -1,6 +1,14 @@
 "use client"
 import { useState } from "react";
 import { FileUpload } from "@/components/ui/file-upload";
+import Summary from "@/components/Summary/Summary";
+
+
+//summary
+//answers
+//expand on topic
+//important questions
+
 
 export default function Home() {
   const [file, setFile] = useState<File | null>(null);
@@ -48,12 +56,7 @@ export default function Home() {
       {error && <p className="text-red-500 mt-2">{error}</p>}
       {loading && <p className="mt-2">Processing PDF...</p>}
       {summary && (
-        <div className="mt-4">
-          <h2 className="text-lg font-semibold mb-2">Summary</h2>
-          <div className="whitespace-pre-wrap border p-4 rounded-md bg-neutral-50 dark:bg-neutral-900">
-            {summary}
-          </div>
-        </div>
+        <Summary summary={summary} ></Summary>
       )}
     </div>
   );
