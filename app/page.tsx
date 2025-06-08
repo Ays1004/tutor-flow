@@ -154,7 +154,7 @@ export default function Home() {
             </div>
             <FileUpload onChange={handleFile} />
             <div className="pb-2 text-gray-400 text-center">
-                Only supports pdf files with scannable text for now. (eg. Question Papers from University)
+                Only supports parseable pdf files with scannable text for now. (eg. Question Papers from University)
             </div>
             {error && <p className="text-red-500 mt-2">{error}</p>}
             {loading && <p className="mt-2">Processing PDF...</p>}
