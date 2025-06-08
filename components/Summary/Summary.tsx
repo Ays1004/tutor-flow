@@ -153,7 +153,7 @@ const Summary = ({ file, viewMode, summaryCache, setSummaryCache }: SummaryProps
 
   if (viewMode !== "summary") return null;
   if (!file) return null;
-  if (summaryLoading) return <p className="mt-2">Processing PDF...</p>;
+  if (summaryLoading) return <p className="mt-2 text-center">Processing PDF...</p>;
   if (summaryError) return <p className="text-red-500 mt-2">{summaryError}</p>;
   if (!topics.length) return null;
 

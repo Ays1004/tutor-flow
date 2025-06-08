@@ -6,10 +6,16 @@ import Answers from "@/components/Answers/Answers";
 
 type ViewMode = "summary" | "answers";
 
-//summary
-//answers
-//expand on topic
-//important questions
+//add Google Auth
+//store PDFs
+//Track Metadata
+//Multiple PDFs
+//User Dashboard
+//History of summaries
+//Tags
+//Re-Parse if the model is updated
+//Export Answers as a pdf document
+//Handwritten Pdf scan
 
 export default function Home() {
     const [file, setFile] = useState<File | null>(null);
