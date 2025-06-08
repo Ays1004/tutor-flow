@@ -115,7 +115,7 @@ export default function Home() {
             }
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [viewMode]);
+    }, [viewMode, file]);
 
     return (
         <div className="w-full max-w-4xl mx-auto min-h-96 border border-dashed bg-white dark:bg-black border-neutral-200 dark:border-neutral-800 rounded-lg p-4">
