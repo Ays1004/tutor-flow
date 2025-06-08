@@ -121,8 +121,9 @@ export default function Home() {
         <div className="w-full max-w-4xl mx-auto min-h-96 border border-dashed bg-white dark:bg-black border-neutral-200 dark:border-neutral-800 rounded-lg p-4">
             <div className="text-center pb-5">
                 <div className="pb-5 text-4xl font-bold">
-                    Tutor-Flow
+                    Tutor-Flow <span className="text-xl text-gray-600">beta</span>
                 </div>
+                
                 <div className="pb-2 text-gray-600">
                     Upload your question paper as a parseable PDF to get instant summaries, important topics, and AI-generated Q&A, <span className="text-gray-950">all in one place</span>
                 </div>
