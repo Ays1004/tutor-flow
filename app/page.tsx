@@ -1,5 +1,6 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabaseClient";
 import { FileUpload } from "@/components/ui/file-upload";
 import Summary from "@/components/Summary/Summary";
 import Answers from "@/components/Answers/Answers";
@@ -25,6 +26,7 @@ export default function Home() {
     const [context, setContext] = useState<string | null>(null);
     const [viewMode, setViewMode] = useState<ViewMode>("summary");
     const [qnaLoading, setQnaLoading] = useState(false);
+    const [user, setUser] = useState<any>(null);
 
     // Helper to get a unique key for the file (using name + size as a simple hash)
     const getFileKey = (f: File | null) => (f ? `${f.name}_${f.size}` : "");
@@ -93,15 +95,62 @@ export default function Home() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [viewMode, file]);
 
+    // Check auth state on mount
+    useEffect(() => {
+        const getUser = async () => {
+            const { data } = await supabase.auth.getUser();
+            setUser(data.user);
+        };
+        getUser();
+        const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+            setUser(session?.user ?? null);
+        });
+        return () => {
+            listener.subscription.unsubscribe();
+        };
+    }, []);
+
+    const login = async () => {
+        await supabase.auth.signInWithOAuth({ provider: "google" });
+    };
+
+    const logout = async () => {
+        await supabase.auth.signOut();
+    };
+
+    if (!user) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-screen">
+                <h1 className="text-3xl font-bold mb-4">Tutor-Flow</h1>
+                <button
+                    onClick={login}
+                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                >
+                    Sign in with Google
+                </button>
+            </div>
+        );
+    }
+
     return (
         <div className="w-full max-w-4xl mx-auto min-h-96 border border-dashed bg-white dark:bg-black border-neutral-200 dark:border-neutral-800 rounded-lg p-4">
-            <div className="text-center pb-5">
-                <div className="pb-5 text-4xl font-bold">
-                    Tutor-Flow <span className="text-xl text-gray-600">beta</span>
+            <div className="flex justify-between flex-col items-center pb-5">
+                <div>
+                    <div className="pb-2 text-4xl font-bold">
+                        Tutor-Flow <span className="text-xl text-gray-600">beta</span>
+                    </div>
+                    <div className="pb-2 text-gray-600">
+                        Upload your question paper as a parseable PDF to get instant summaries, important topics, and AI-generated Q&A, <span className="text-gray-950">all in one place</span>
+                    </div>
                 </div>
-                
-                <div className="pb-2 text-gray-600">
-                    Upload your question paper as a parseable PDF to get instant summaries, important topics, and AI-generated Q&A, <span className="text-gray-950">all in one place</span>
+                <div>
+                    <span className="mr-2 text-sm text-gray-700">{user.email}</span>
+                    <button
+                        onClick={logout}
+                        className="px-3 py-1 bg-neutral-200 rounded hover:bg-neutral-300 text-sm"
+                    >
+                        Sign out
+                    </button>
                 </div>
             </div>
 
