@@ -41,7 +41,7 @@ export async function POST(request: Request) {
       const groqRes = await axios.post(
         'https://api.groq.com/openai/v1/chat/completions',
         {
-          model: 'llama3-8b-8192',
+          model: "meta-llama/llama-4-scout-17b-16e-instruct",
           messages: [
             { role: 'system', content: 'You are a helpful assistant, Based on the following parsed question paper data, extract all the important topics and concepts that are frequently asked or critical for exam preparation. Prioritize repeated themes, high-weightage areas, and key concepts. List them clearly and concisely without any introduction or conclusion, Format the output such that it is easily formatable with react-markdown' },
             { role: 'user', content: `Summarize the following academic text:\n\n${text}` },
@@ -62,7 +62,7 @@ export async function POST(request: Request) {
       const groqRes = await axios.post(
         'https://api.groq.com/openai/v1/chat/completions',
         {
-          model: 'llama3-8b-8192',
+          model: "meta-llama/llama-4-scout-17b-16e-instruct",
           messages: [
             { 
               role: 'system', 

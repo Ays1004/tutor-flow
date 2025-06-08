@@ -14,7 +14,7 @@ export async function POST(request: Request) {
     const groqRes = await axios.post(
       'https://api.groq.com/openai/v1/chat/completions',
       {
-        model: 'llama3-8b-8192',
+        model: "meta-llama/llama-4-scout-17b-16e-instruct",
         messages: [
           { 
             role: 'system', 
