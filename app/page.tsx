@@ -15,96 +15,59 @@ export default function Home() {
     const [file, setFile] = useState<File | null>(null);
     const [summaryCache, setSummaryCache] = useState<Record<string, string>>({});
     const [qnaCache, setQnaCache] = useState<Record<string, { questions: { question: string }[]; context: string }>>({});
-    const [summary, setSummary] = useState<string | null>(null);
     const [questions, setQuestions] = useState<Array<{ question: string }> | null>(null);
     const [context, setContext] = useState<string | null>(null);
-    const [error, setError] = useState<string>("");
-    const [loading, setLoading] = useState(false);
     const [viewMode, setViewMode] = useState<ViewMode>("summary");
 
     // Helper to get a unique key for the file (using name + size as a simple hash)
     const getFileKey = (f: File | null) => (f ? `${f.name}_${f.size}` : "");
 
-    // Ref to prevent double-fetch on initial mount
-    const isFirstLoad = useRef(true);
+    const handleFile = async (files: File[]) => {
+        const uploadedFile = files?.[0];
+        if (!uploadedFile) return;
+        setFile(uploadedFile);
+        setQuestions(null);
+        setContext(null);
+        const fileKey = getFileKey(uploadedFile);
+        if (viewMode === "answers" && qnaCache[fileKey]) {
+            setQuestions(qnaCache[fileKey].questions);
+            setContext(qnaCache[fileKey].context);
+        } else if (viewMode === "answers") {
+            fetchData("answers", uploadedFile);
+        }
+    };
 
+    // Only fetch QnA when needed
     const fetchData = async (mode: ViewMode, uploadedFile: File) => {
-        setLoading(true);
-        setError("");
+        if (mode !== "answers") return;
         try {
             const formData = new FormData();
             formData.append("file", uploadedFile);
             formData.append("mode", mode);
-
             const response = await fetch("/api/process-pdf", {
                 method: "POST",
                 body: formData,
             });
-
-            if (!response.ok) {
-                throw new Error("Failed to process PDF");
-            }
-
+            if (!response.ok) throw new Error("Failed to process PDF");
             const data = await response.json();
             const fileKey = getFileKey(uploadedFile);
-
-            if (mode === "summary") {
-                setSummaryCache(prev => ({ ...prev, [fileKey]: data.summary }));
-                setSummary(data.summary);
-            } else {
-                setQnaCache(prev => ({
-                    ...prev,
-                    [fileKey]: { questions: data.questions, context: data.context }
-                }));
-                setQuestions(data.questions);
-                setContext(data.context);
-            }
+            setQnaCache(prev => ({
+                ...prev,
+                [fileKey]: { questions: data.questions, context: data.context }
+            }));
+            setQuestions(data.questions);
+            setContext(data.context);
         } catch (err) {
-            setError("Failed to process PDF file");
-            console.error(err);
-        } finally {
-            setLoading(false);
+            setQuestions(null);
+            setContext(null);
         }
     };
 
-    const handleFile = async (files: File[]) => {
-        const uploadedFile = files?.[0];
-        if (!uploadedFile) return;
-
-        setFile(uploadedFile);
-        setSummary(null);
-        setQuestions(null);
-        setContext(null);
-
-        const fileKey = getFileKey(uploadedFile);
-
-        if (viewMode === "summary" && summaryCache[fileKey]) {
-            setSummary(summaryCache[fileKey]);
-        } else if (viewMode === "answers" && qnaCache[fileKey]) {
-            setQuestions(qnaCache[fileKey].questions);
-            setContext(qnaCache[fileKey].context);
-        } else {
-            fetchData(viewMode, uploadedFile);
-        }
-    };
-
-    // Regenerate summary/QnA when viewMode changes, using cache if available
+    // Regenerate QnA when viewMode changes, using cache if available
     useEffect(() => {
         if (!file) return;
-        if (isFirstLoad.current) {
-            isFirstLoad.current = false;
-            return;
-        }
         const fileKey = getFileKey(file);
-
-        if (viewMode === "summary") {
-            if (summaryCache[fileKey]) {
-                setSummary(summaryCache[fileKey]);
-            } else {
-                setSummary(null);
-                fetchData("summary", file);
-            }
-        } else if (viewMode === "answers") {
+        if (viewMode === "answers") {
             if (qnaCache[fileKey]) {
                 setQuestions(qnaCache[fileKey].questions);
                 setContext(qnaCache[fileKey].context);
@@ -157,9 +120,7 @@ export default function Home() {
             <div className="pb-2 text-gray-400 text-center">
                 Only supports parseable pdf files with scannable text for now. (eg. Question Papers from University)
             </div>
-            {error && <p className="text-red-500 mt-2">{error}</p>}
-            {loading && <p className="mt-2">Processing PDF...</p>}
-            {summary && viewMode === "summary" && <Summary summary={summary} />}
+            <Summary file={file} viewMode={viewMode} summaryCache={summaryCache} setSummaryCache={setSummaryCache} />
             {questions && context && viewMode === "answers" && (
                 <Answers questions={questions} context={context} />
             )}
