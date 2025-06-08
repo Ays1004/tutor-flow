@@ -8,7 +8,7 @@ export async function POST(request: Request) {
     const { question, context } = await request.json();
 
     if (!question || !context) {
-      return NextResponse.json({ error: 'Question and context are required' }, { status: 400 });
+      return NextResponse.json({ error: 'Topic and context are required' }, { status: 400 });
     }
 
     const groqRes = await axios.post(
@@ -18,11 +18,11 @@ export async function POST(request: Request) {
         messages: [
           { 
             role: 'system', 
-            content: 'You are a helpful assistant. Provide a detailed and accurate answer to the given question loosely based on the provided context. Format the response in markdown for better readability. highlight keywords by making them bold' 
+            content: 'You are a helpful assistant. Provide a detailed and accurate explanation to the given topic loosely based on the provided context. Format the response in markdown for better readability. highlight keywords by making them bold' 
           },
           { 
             role: 'user', 
-            content: `Context:\n${context}\n\nQuestion: ${question}` 
+            content: `Context:\n${context}\n\Topic: ${question}` 
           },
         ],
       },

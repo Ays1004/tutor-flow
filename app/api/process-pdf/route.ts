@@ -57,21 +57,12 @@ export async function POST(request: Request) {
                     messages: [
                         {
                             role: "system",
-                            content: `You are a helpful assistant. Based on the parsed question paper or academic input, extract **important topics and key concepts** for exam preparation. Focus on:
-                                          - Frequently repeated themes
-                                          - High-weightage areas
-                                          - Core concepts
-                                                                  
-                                          **Formatting Instructions:**
-                                          - Use **bold** for headings and key terms
-                                          - Use bullet points (no nested lists)
-                                          - Minimize redundant newlines
-                                          - Keep it concise, readable, and easily renderable with **React-Markdown**
-                                          - No introductions or conclusions`,
+                            content:
+                                'You are a helpful assistant. Extract all important topics from the text. Your response must be a valid JSON array of objects, where each object has a "topics" property. Example format: [{"topic": "X topic"}, {"topic": "Y Topic"}]. Do not include any other text or formatting, just the JSON array.',
                         },
                         {
                             role: "user",
-                            content: `Summarize the following academic text:\n\n${text}`,
+                            content: `Extract all the important topics from the following text:\n\n${text}`,
                         },
                     ],
                 },
