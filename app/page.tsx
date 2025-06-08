@@ -18,6 +18,7 @@ export default function Home() {
     const [questions, setQuestions] = useState<Array<{ question: string }> | null>(null);
     const [context, setContext] = useState<string | null>(null);
     const [viewMode, setViewMode] = useState<ViewMode>("summary");
+    const [qnaLoading, setQnaLoading] = useState(false);
 
     // Helper to get a unique key for the file (using name + size as a simple hash)
     const getFileKey = (f: File | null) => (f ? `${f.name}_${f.size}` : "");
@@ -28,11 +29,13 @@ export default function Home() {
         setFile(uploadedFile);
         setQuestions(null);
         setContext(null);
+        setQnaLoading(false);
         const fileKey = getFileKey(uploadedFile);
         if (viewMode === "answers" && qnaCache[fileKey]) {
             setQuestions(qnaCache[fileKey].questions);
             setContext(qnaCache[fileKey].context);
         } else if (viewMode === "answers") {
+            setQnaLoading(true);
             fetchData("answers", uploadedFile);
         }
     };
@@ -57,9 +60,11 @@ export default function Home() {
             }));
             setQuestions(data.questions);
             setContext(data.context);
+            setQnaLoading(false);
         } catch (err) {
             setQuestions(null);
             setContext(null);
+            setQnaLoading(false);
         }
     };
 
@@ -71,9 +76,11 @@ export default function Home() {
             if (qnaCache[fileKey]) {
                 setQuestions(qnaCache[fileKey].questions);
                 setContext(qnaCache[fileKey].context);
+                setQnaLoading(false);
             } else {
                 setQuestions(null);
                 setContext(null);
+                setQnaLoading(true);
                 fetchData("answers", file);
             }
         }
@@ -121,8 +128,14 @@ export default function Home() {
                 Only supports parseable pdf files with scannable text for now. (eg. Question Papers from University)
             </div>
             <Summary file={file} viewMode={viewMode} summaryCache={summaryCache} setSummaryCache={setSummaryCache} />
-            {questions && context && viewMode === "answers" && (
-                <Answers questions={questions} context={context} />
+            {viewMode === "answers" && (
+                qnaLoading ? (
+                    <p className="mt-2 text-center">Processing PDF...</p>
+                ) : (
+                    questions && context ? (
+                        <Answers questions={questions} context={context} />
+                    ) : null
+                )
             )}
         </div>
     );
