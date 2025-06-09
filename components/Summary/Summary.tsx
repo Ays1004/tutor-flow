@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { remark } from 'remark';
-import html from 'remark-html'; // updated import
+import html from 'remark-html';
+import remarkGfm from 'remark-gfm'; // <-- Add this import
 
 interface SummaryProps {
   file: File | null;
@@ -172,7 +173,10 @@ const Summary = ({ file, viewMode, summaryCache, setSummaryCache }: SummaryProps
   useEffect(() => {
     Object.entries(topicDetails).forEach(async ([idx, md]) => {
       if (md) {
-        const file = await remark().use(html).process(md); // use html plugin
+        const file = await remark()
+          .use(remarkGfm) // <-- Add GFM support here
+          .use(html)
+          .process(md);
         setRenderedMarkdown(prev => ({ ...prev, [idx]: String(file) }));
       }
     });

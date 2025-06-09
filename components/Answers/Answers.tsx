@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { remark } from 'remark';
 import html from 'remark-html';
+import remarkGfm from 'remark-gfm'; // <-- Add this import
 
 interface Question {
   question: string;
@@ -27,7 +28,10 @@ const Answers = ({ questions: initialQuestions, context }: AnswersProps) => {
     // Render markdown for all answers when answers change
     Object.entries(answers).forEach(async ([idx, md]) => {
       if (md) {
-        const file = await remark().use(html).process(md);
+        const file = await remark()
+          .use(remarkGfm) // <-- Add GFM support here
+          .use(html)
+          .process(md);
         setRenderedMarkdown(prev => ({ ...prev, [idx]: String(file) }));
       }
     });
