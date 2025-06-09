@@ -99,7 +99,7 @@ export async function POST(request: Request) {
                         }
                     ],
                     {
-                        onConflict: ['user_id', 'context'],
+                        onConflict: 'user_id,context',
                         ignoreDuplicates: false
                     }
                 );
@@ -165,7 +165,7 @@ export async function POST(request: Request) {
                         }
                     ],
                     {
-                        onConflict: ['user_id', 'context'],
+                        onConflict: 'user_id,context',
                         ignoreDuplicates: false
                     }
                 );
