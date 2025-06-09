@@ -7,12 +7,12 @@ interface Question {
 }
 
 interface AnswersProps {
-  questions: Question[];
+  initialQuestions: Question[];
   context: string;
 }
 
 
-const Answers = ({ questions: initialQuestions, context }: AnswersProps) => {
+const Answers = ({ initialQuestions, context }: AnswersProps) => {
   const [questions, setQuestions] = useState<Question[]>(initialQuestions);
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
   const [loading, setLoading] = useState<Record<number, boolean>>({});
@@ -111,7 +111,7 @@ const Answers = ({ questions: initialQuestions, context }: AnswersProps) => {
                 <span className="font-semibold">{index + 1}) </span>
                 {editingIndex === index ? (
                   <input
-                    className="border rounded px-1 py-0.5 w-full max-w-xs text-black dark:text-white bg-white dark:bg-neutral-800"
+                    className="border rounded px-1 py-0.5 w-full max-w-140 text-black dark:text-white bg-white dark:bg-neutral-800"
                     value={editValue}
                     autoFocus
                     onChange={handleEditChange}

@@ -1,25 +1,89 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { MarkdownRenderer } from '../ui/MarkdownRenderer';
+
+interface SummaryProps {
+  file: File | null;
+  viewMode: string;
+  summaryCache: Record<string, string>;
+  setSummaryCache: React.Dispatch<React.SetStateAction<Record<string, string>>>;
+}
 
 interface Topic {
   topic: string;
 }
 
-interface SummaryProps {
-  initialTopics: { topic: string }[]; // ✅ matches what you're passing
-  context: string;
-}
-
-
-const Summary = ({ initialTopics, context }: SummaryProps) => {
-  const [topics, setTopics] = useState<Topic[]>(initialTopics);
+const SummaryFromFile = ({ file, viewMode, summaryCache, setSummaryCache }: SummaryProps) => {
+  const [topics, setTopics] = useState<Topic[]>([]);
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
   const [loading, setLoading] = useState<Record<number, boolean>>({});
   const [error, setError] = useState<string | null>(null);
   const [topicDetails, setTopicDetails] = useState<Record<number, string>>({});
+  const [context, setContext] = useState<string>("");
+  const [summaryRaw, setSummaryRaw] = useState<string | null>(null);
+  const [summaryError, setSummaryError] = useState<string | null>(null);
+  const [summaryLoading, setSummaryLoading] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editValue, setEditValue] = useState<string>('');
   const [newTopic, setNewTopic] = useState<string>('');
+  const [user, setUser] = useState<any>(null);
+
+
+  // Helper to get a unique key for the file (using name + size as a simple hash)
+  const getFileKey = (f: File | null) => (f ? `${f.name}_${f.size}` : "");
+
+  useEffect(() => {
+    if (!file || viewMode !== "summary") return;
+    const fileKey = getFileKey(file);
+    setSummaryError(null);
+    setError(null);
+    setTopics([]);
+    setTopicDetails({});
+    setExpandedIndex(null);
+    if (summaryCache[fileKey]) {
+      setSummaryRaw(summaryCache[fileKey]);
+      setContext(summaryCache[fileKey]);
+      try {
+        const parsed = JSON.parse(summaryCache[fileKey]);
+        setTopics(parsed.map((t: any) => ({ topic: t.topic })));
+      } catch (e) {
+        setSummaryError("Failed to parse topics from summary.");
+      }
+      return;
+    }
+    setSummaryRaw(null);
+    setSummaryLoading(true);
+    const fetchSummary = async () => {
+      try {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("mode", "summary");
+        if (user?.id) {
+          formData.append("user_id", user.id); // Add user_id to form
+        }
+        const response = await fetch("/api/process-pdf", {
+          method: "POST",
+          body: formData,
+        });
+        if (!response.ok) throw new Error("Failed to process PDF");
+        const data = await response.json();
+        setSummaryCache(prev => ({ ...prev, [fileKey]: data.summary }));
+        setSummaryRaw(data.summary);
+        setContext(data.summary);
+        try {
+          const parsed = JSON.parse(data.summary);
+          setTopics(parsed.map((t: any) => ({ topic: t.topic })));
+        } catch (e) {
+          setSummaryError("Failed to parse topics from summary.");
+        }
+      } catch (err) {
+        setSummaryError("Failed to process PDF file");
+      } finally {
+        setSummaryLoading(false);
+      }
+    };
+    fetchSummary();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [file, viewMode, user]);
 
   const fetchTopicDetail = async (topic: string, index: number) => {
     setLoading(prev => ({ ...prev, [index]: true }));
@@ -27,10 +91,17 @@ const Summary = ({ initialTopics, context }: SummaryProps) => {
     try {
       const response = await fetch('/api/get-topic', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: topic, context }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          question: topic,
+          context: context,
+        }),
       });
-      if (!response.ok) throw new Error('Failed to fetch topic details');
+      if (!response.ok) {
+        throw new Error('Failed to fetch topic details');
+      }
       const data = await response.json();
       setTopicDetails(prev => ({ ...prev, [index]: data.answer }));
     } catch (err) {
@@ -58,16 +129,25 @@ const Summary = ({ initialTopics, context }: SummaryProps) => {
     setEditValue(topic);
   };
 
+  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEditValue(e.target.value);
+  };
+
   const handleEditSave = (index: number) => {
-    const updated = [...topics];
-    updated[index] = { topic: editValue };
-    setTopics(updated);
+    const updatedTopics = [...topics];
+    updatedTopics[index] = { ...updatedTopics[index], topic: editValue };
+    setTopics(updatedTopics);
     setEditingIndex(null);
+    // Optionally, clear the topicDetails cache for this topic if you want to force refetch
+    // setTopicDetails(prev => ({ ...prev, [index]: undefined }));
   };
 
   const handleEditKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, index: number) => {
-    if (e.key === 'Enter') handleEditSave(index);
-    else if (e.key === 'Escape') setEditingIndex(null);
+    if (e.key === 'Enter') {
+      handleEditSave(index);
+    } else if (e.key === 'Escape') {
+      setEditingIndex(null);
+    }
   };
 
   const handleAddTopic = () => {
@@ -76,11 +156,15 @@ const Summary = ({ initialTopics, context }: SummaryProps) => {
     setNewTopic('');
   };
 
-  if (!topics.length) return <p className="text-neutral-500">No topics found.</p>;
+  if (viewMode !== "summary") return null;
+  if (!file) return null;
+  if (summaryLoading) return <p className="mt-2 text-center">Processing PDF...</p>;
+  if (summaryError) return <p className="text-red-500 mt-2">{summaryError}</p>;
+  if (!topics.length) return null;
 
   return (
     <div className="mt-4">
-      <h2 className="text-lg font-semibold mb-4">Summary</h2>
+      <h2 className="text-lg font-semibold mb-4">Topics</h2>
       <ul className="space-y-2">
         {topics.map((t, index) => (
           <li key={index}>
@@ -92,10 +176,10 @@ const Summary = ({ initialTopics, context }: SummaryProps) => {
                 <span className="font-semibold">{index + 1}) </span>
                 {editingIndex === index ? (
                   <input
-                    className="border rounded px-1 py-0.5 w-full max-w-140 text-black dark:text-white bg-white dark:bg-neutral-800"
+                    className="border rounded px-1 py-0.5 w-full max-w-xs text-black dark:text-white bg-white dark:bg-neutral-800"
                     value={editValue}
                     autoFocus
-                    onChange={e => setEditValue(e.target.value)}
+                    onChange={handleEditChange}
                     onBlur={() => handleEditSave(index)}
                     onClick={e => e.stopPropagation()}
                     onKeyDown={e => handleEditKeyDown(e, index)}
@@ -105,6 +189,7 @@ const Summary = ({ initialTopics, context }: SummaryProps) => {
                 )}
               </span>
               <div className="flex items-center ml-2">
+                {/* Reload button: only show if topic details are loaded and not loading */}
                 {topicDetails[index] && !loading[index] && (
                   <button
                     className="ml-2 p-1 rounded hover:bg-neutral-300 dark:hover:bg-neutral-700"
@@ -112,7 +197,7 @@ const Summary = ({ initialTopics, context }: SummaryProps) => {
                       e.stopPropagation();
                       fetchTopicDetail(topics[index].topic, index);
                     }}
-                    title="Reload"
+                    title="Reload topic details"
                   >
                     {/* SVG reload icon */}
                     <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="100" height="100" viewBox="0 0 30 30" className="w-5 h-5">
@@ -120,6 +205,7 @@ const Summary = ({ initialTopics, context }: SummaryProps) => {
                     </svg>
                   </button>
                 )}
+                {/* Edit button: always show if not editing */}
                 {editingIndex !== index && (
                   <button
                     className="ml-2 p-1 rounded hover:bg-neutral-300 dark:hover:bg-neutral-700"
@@ -127,7 +213,7 @@ const Summary = ({ initialTopics, context }: SummaryProps) => {
                       e.stopPropagation();
                       handleEditClick(index, t.topic);
                     }}
-                    title="Edit"
+                    title="Edit topic"
                   >
                     {/* SVG pencil icon */}
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
@@ -153,8 +239,7 @@ const Summary = ({ initialTopics, context }: SummaryProps) => {
           </li>
         ))}
       </ul>
-
-      {/* Add Topic */}
+      {/* Add Topic Section */}
       <div className="mt-6 flex items-center gap-2">
         <input
           type="text"
@@ -163,7 +248,9 @@ const Summary = ({ initialTopics, context }: SummaryProps) => {
           value={newTopic}
           onChange={e => setNewTopic(e.target.value)}
           onKeyDown={e => {
-            if (e.key === 'Enter') handleAddTopic();
+            if (e.key === 'Enter' && newTopic.trim()) {
+              handleAddTopic();
+            }
           }}
         />
         <button
@@ -178,4 +265,4 @@ const Summary = ({ initialTopics, context }: SummaryProps) => {
   );
 };
 
-export default Summary;
+export default SummaryFromFile;

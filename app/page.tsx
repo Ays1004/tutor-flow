@@ -2,8 +2,8 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { FileUpload } from "@/components/ui/file-upload";
-import Summary from "@/components/Summary/Summary";
 import Answers from "@/components/Answers/Answers";
+import SummaryFromFile from "@/components/Summary/SummaryFromFile";
 
 type ViewMode = "summary" | "answers";
 
@@ -200,7 +200,7 @@ export default function Home() {
                 </div>
             </div>
 
-            <Summary
+            <SummaryFromFile
                 file={file}
                 viewMode={viewMode}
                 summaryCache={summaryCache}
@@ -210,7 +210,7 @@ export default function Home() {
                 (qnaLoading ? (
                     <p className="mt-2 text-center">Processing PDF...</p>
                 ) : questions && context ? (
-                    <Answers questions={questions} context={context} />
+                    <Answers initialQuestions={questions} context={context} />
                 ) : null)}
         </div>
     );
