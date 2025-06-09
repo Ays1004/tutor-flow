@@ -1,23 +1,26 @@
 import { NextResponse } from "next/server";
 import PDFParser from "pdf2json";
 import axios from "axios";
-import { createClient } from "@supabase/supabase-js"; // Add this
+import { createClient } from "@supabase/supabase-js";
+import { createHash } from "crypto"; // Import crypto for hashing
 
-//update so a unique hash is generated for context and userid
-
+// Function to generate a unique hash
+const generateHash = (user_id: string, context: string) => {
+    return createHash('sha256').update(`${user_id}-${context}`).digest('hex');
+};
 
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY); // Add this
+const supabase = createClient(SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY!);
 
 export async function POST(request: Request) {
     try {
         const formData = await request.formData();
         const file = formData.get("file") as File;
         const mode = formData.get("mode") as string;
-        const user_id = formData.get("user_id") as string; // Make sure user_id is sent in the form
+        const user_id = formData.get("user_id") as string;
 
         if (!file) {
             return NextResponse.json(
@@ -57,6 +60,8 @@ export async function POST(request: Request) {
             pdfParser.parseBuffer(buffer);
         });
 
+        const uniqueHash = generateHash(user_id, text); // Generate unique hash
+
         if (mode === "summary") {
             // Call Groq API for summarization
             const groqRes = await axios.post(
@@ -95,11 +100,11 @@ export async function POST(request: Request) {
                             title: file.name,
                             context: text,
                             summary,
-                            // Only update summary, leave questions as is if already present
+                            hash: uniqueHash // Store the hash
                         }
                     ],
                     {
-                        onConflict: 'user_id,context',
+                        onConflict: 'hash', // Use hash for conflict resolution if desired
                         ignoreDuplicates: false
                     }
                 );
@@ -161,11 +166,11 @@ export async function POST(request: Request) {
                             title: file.name,
                             context: text,
                             questions,
-                            // Only update questions, leave summary as is if already present
+                            hash: uniqueHash // Store the hash
                         }
                     ],
                     {
-                        onConflict: 'user_id,context',
+                        onConflict: 'hash', // Use hash for conflict resolution if desired
                         ignoreDuplicates: false
                     }
                 );
