@@ -3,6 +3,9 @@ import PDFParser from "pdf2json";
 import axios from "axios";
 import { createClient } from "@supabase/supabase-js"; // Add this
 
+//update so a unique hash is generated for context and userid
+
+
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
@@ -85,23 +88,28 @@ export async function POST(request: Request) {
             // Insert into Supabase
             const { error: supabaseError } = await supabase
                 .from('user_question_data')
-                .insert([
+                .upsert(
+                    [
+                        {
+                            user_id,
+                            title: file.name,
+                            context: text,
+                            summary,
+                            // Only update summary, leave questions as is if already present
+                        }
+                    ],
                     {
-                        user_id,
-                        title: file.name,
-                        context: text,
-                        summary,
-                        questions: null
+                        onConflict: ['user_id', 'context'],
+                        ignoreDuplicates: false
                     }
-                ]);
+                );
             if (supabaseError) {
-                console.error("Supabase insert error:", supabaseError);
+                console.error("Supabase upsert error:", supabaseError);
                 return NextResponse.json(
                     { error: "Failed to save to database", details: supabaseError.message },
                     { status: 500 }
                 );
             }
-
             return NextResponse.json({ summary });
         } else {
             // Call Groq API for questions
@@ -146,23 +154,28 @@ export async function POST(request: Request) {
             // Insert into Supabase
             const { error: supabaseError } = await supabase
                 .from('user_question_data')
-                .insert([
+                .upsert(
+                    [
+                        {
+                            user_id,
+                            title: file.name,
+                            context: text,
+                            questions,
+                            // Only update questions, leave summary as is if already present
+                        }
+                    ],
                     {
-                        user_id,
-                        title: file.name,
-                        context: text,
-                        summary: null,
-                        questions
+                        onConflict: ['user_id', 'context'],
+                        ignoreDuplicates: false
                     }
-                ]);
+                );
             if (supabaseError) {
-                console.error("Supabase insert error:", supabaseError);
+                console.error("Supabase upsert error:", supabaseError);
                 return NextResponse.json(
                     { error: "Failed to save to database", details: supabaseError.message },
                     { status: 500 }
                 );
             }
-
             return NextResponse.json({ questions, context: text });
         }
     } catch (error) {
