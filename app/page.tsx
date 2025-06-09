@@ -7,8 +7,6 @@ import Answers from "@/components/Answers/Answers";
 
 type ViewMode = "summary" | "answers";
 
-//add Google Auth
-//store PDFs
 //Track Metadata
 //Multiple PDFs
 //User Dashboard
@@ -16,13 +14,19 @@ type ViewMode = "summary" | "answers";
 //Tags
 //Re-Parse if the model is updated
 //Export Answers as a pdf document
-//Handwritten Pdf scan 
+//Handwritten Pdf scan
 
 export default function Home() {
     const [file, setFile] = useState<File | null>(null);
-    const [summaryCache, setSummaryCache] = useState<Record<string, string>>({});
-    const [qnaCache, setQnaCache] = useState<Record<string, { questions: { question: string }[]; context: string }>>({});
-    const [questions, setQuestions] = useState<Array<{ question: string }> | null>(null);
+    const [summaryCache, setSummaryCache] = useState<Record<string, string>>(
+        {}
+    );
+    const [qnaCache, setQnaCache] = useState<
+        Record<string, { questions: { question: string }[]; context: string }>
+    >({});
+    const [questions, setQuestions] = useState<Array<{
+        question: string;
+    }> | null>(null);
     const [context, setContext] = useState<string | null>(null);
     const [viewMode, setViewMode] = useState<ViewMode>("summary");
     const [qnaLoading, setQnaLoading] = useState(false);
@@ -62,9 +66,9 @@ export default function Home() {
             if (!response.ok) throw new Error("Failed to process PDF");
             const data = await response.json();
             const fileKey = getFileKey(uploadedFile);
-            setQnaCache(prev => ({
+            setQnaCache((prev) => ({
                 ...prev,
-                [fileKey]: { questions: data.questions, context: data.context }
+                [fileKey]: { questions: data.questions, context: data.context },
             }));
             setQuestions(data.questions);
             setContext(data.context);
@@ -102,9 +106,11 @@ export default function Home() {
             setUser(data.user);
         };
         getUser();
-        const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-            setUser(session?.user ?? null);
-        });
+        const { data: listener } = supabase.auth.onAuthStateChange(
+            (_event, session) => {
+                setUser(session?.user ?? null);
+            }
+        );
         return () => {
             listener.subscription.unsubscribe();
         };
@@ -118,39 +124,44 @@ export default function Home() {
         await supabase.auth.signOut();
     };
 
-    if (!user) {
-        return (
-            <div className="flex flex-col items-center justify-center min-h-screen">
-                <h1 className="text-3xl font-bold mb-4">Tutor-Flow</h1>
-                <button
-                    onClick={login}
-                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                >
-                    Sign in with Google
-                </button>
-            </div>
-        );
-    }
-
     return (
         <div className="w-full max-w-4xl mx-auto min-h-96 border border-dashed bg-white dark:bg-black border-neutral-200 dark:border-neutral-800 rounded-lg p-4">
-            <div className="flex justify-between flex-col items-center pb-5">
-                <div>
+            <div className="flex justify-between flex-row items-center pb-5">
+                <div className="pr-2">
                     <div className="pb-2 text-4xl font-bold">
-                        Tutor-Flow <span className="text-xl text-gray-600">beta</span>
+                        Tutor-Flow{" "}
+                        <span className="text-xl text-gray-600">beta</span>
                     </div>
                     <div className="pb-2 text-gray-600">
-                        Upload your question paper as a parseable PDF to get instant summaries, important topics, and AI-generated Q&A, <span className="text-gray-950">all in one place</span>
+                        Upload your question paper as a parseable PDF to get
+                        instant summaries, important topics, and AI-generated
+                        Q&A,{" "}
+                        <span className="text-gray-950">all in one place</span>
                     </div>
                 </div>
-                <div>
-                    <span className="mr-2 text-sm text-gray-700">{user.email}</span>
-                    <button
-                        onClick={logout}
-                        className="px-3 py-1 bg-neutral-200 rounded hover:bg-neutral-300 text-sm"
-                    >
-                        Sign out
-                    </button>
+                <div className="">
+                    {user ? (
+                        <div>
+                            <span className="mr-2 text-sm text-gray-700">
+                                {user.email}
+                            </span>
+                            <button
+                                onClick={logout}
+                                className="px-3 py-1 bg-neutral-200 rounded hover:bg-neutral-300 text-sm"
+                            >
+                                Sign out
+                            </button>
+                        </div>
+                    ) : (
+                        <div>
+                            <button
+                                onClick={login}
+                                className="px-3 py-1 bg-neutral-200 rounded hover:bg-neutral-300 text-sm"
+                            >
+                                Login
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -180,18 +191,21 @@ export default function Home() {
             </div>
             <FileUpload onChange={handleFile} />
             <div className="pb-2 text-gray-400 text-center">
-                Only supports parseable pdf files with scannable text for now. (eg. Question Papers from University)
+                Only supports parseable pdf files with scannable text for now.
+                (eg. Question Papers from University)
             </div>
-            <Summary file={file} viewMode={viewMode} summaryCache={summaryCache} setSummaryCache={setSummaryCache} />
-            {viewMode === "answers" && (
-                qnaLoading ? (
+            <Summary
+                file={file}
+                viewMode={viewMode}
+                summaryCache={summaryCache}
+                setSummaryCache={setSummaryCache}
+            />
+            {viewMode === "answers" &&
+                (qnaLoading ? (
                     <p className="mt-2 text-center">Processing PDF...</p>
-                ) : (
-                    questions && context ? (
-                        <Answers questions={questions} context={context} />
-                    ) : null
-                )
-            )}
+                ) : questions && context ? (
+                    <Answers questions={questions} context={context} />
+                ) : null)}
         </div>
     );
 }
