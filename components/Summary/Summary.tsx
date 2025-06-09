@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import Markdown from 'react-markdown';
+import { remark } from 'remark';
+import remarkStringify from 'remark-stringify';
 
 interface SummaryProps {
   file: File | null;
@@ -26,6 +27,7 @@ const Summary = ({ file, viewMode, summaryCache, setSummaryCache }: SummaryProps
   const [editValue, setEditValue] = useState<string>('');
   const [newTopic, setNewTopic] = useState<string>('');
   const [user, setUser] = useState<any>(null);
+  const [renderedMarkdown, setRenderedMarkdown] = useState<Record<number, string>>({});
 
   // Get user on mount
   useEffect(() => {
@@ -166,6 +168,16 @@ const Summary = ({ file, viewMode, summaryCache, setSummaryCache }: SummaryProps
     setNewTopic('');
   };
 
+  // Render markdown for all topic details when topicDetails change
+  useEffect(() => {
+    Object.entries(topicDetails).forEach(async ([idx, md]) => {
+      if (md) {
+        const file = await remark().use(remarkStringify).process(md);
+        setRenderedMarkdown(prev => ({ ...prev, [idx]: String(file) }));
+      }
+    });
+  }, [topicDetails]);
+
   if (viewMode !== "summary") return null;
   if (!file) return null;
   if (summaryLoading) return <p className="mt-2 text-center">Processing PDF...</p>;
@@ -240,7 +252,7 @@ const Summary = ({ file, viewMode, summaryCache, setSummaryCache }: SummaryProps
                 ) : error ? (
                   <p className="text-red-500">{error}</p>
                 ) : topicDetails[index] ? (
-                  <Markdown>{topicDetails[index]}</Markdown>
+                  <pre className="whitespace-pre-wrap">{renderedMarkdown[index]}</pre>
                 ) : (
                   <p className="text-neutral-500">Fetching topic details...</p>
                 )}

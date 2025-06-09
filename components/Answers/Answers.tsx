@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import Markdown from 'react-markdown';
+import { useEffect, useState } from 'react';
+import { remark } from 'remark';
+import remarkStringify from 'remark-stringify';
 
 interface Question {
   question: string;
@@ -20,6 +21,17 @@ const Answers = ({ questions: initialQuestions, context }: AnswersProps) => {
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editValue, setEditValue] = useState<string>('');
   const [newQuestion, setNewQuestion] = useState<string>('');
+  const [renderedMarkdown, setRenderedMarkdown] = useState<Record<number, string>>({});
+
+  useEffect(() => {
+    // Render markdown for all answers when answers change
+    Object.entries(answers).forEach(async ([idx, md]) => {
+      if (md) {
+        const file = await remark().use(remarkStringify).process(md);
+        setRenderedMarkdown(prev => ({ ...prev, [idx]: String(file) }));
+      }
+    });
+  }, [answers]);
 
   const fetchAnswer = async (question: string, index: number) => {
     setLoading(prev => ({ ...prev, [index]: true }));
@@ -164,7 +176,7 @@ const Answers = ({ questions: initialQuestions, context }: AnswersProps) => {
                 ) : error ? (
                   <p className="text-red-500">{error}</p>
                 ) : answers[index] ? (
-                  <Markdown>{answers[index]}</Markdown>
+                  <pre className="whitespace-pre-wrap">{renderedMarkdown[index]}</pre>
                 ) : (
                   <p className="text-neutral-500">Fetching answer...</p>
                 )}
@@ -199,4 +211,4 @@ const Answers = ({ questions: initialQuestions, context }: AnswersProps) => {
   );
 };
 
-export default Answers; 
+export default Answers;

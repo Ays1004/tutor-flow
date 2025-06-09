@@ -23,7 +23,8 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-dropzone": "^14.3.8",
-    "react-markdown": "^10.1.0",
+    "remark": "^15.0.1",
+    "remark-stringify": "^11.0.0",
     "tailwind-merge": "^3.3.0"
   },
   "devDependencies": {

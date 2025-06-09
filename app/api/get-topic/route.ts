@@ -18,7 +18,7 @@ export async function POST(request: Request) {
         messages: [
           { 
             role: 'system', 
-            content: 'You are a helpful assistant. Provide a detailed and accurate explanation to the given topic loosely based on the provided context. Format the response in markdown for better readability. highlight keywords by making them bold' 
+            content: 'You are a helpful assistant. Provide a detailed and accurate explanation to the given topic loosely based on the provided context. Format the response in remark markdown for better readability. highlight keywords, do not return the topic name at start' 
           },
           { 
             role: 'user', 

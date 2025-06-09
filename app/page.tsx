@@ -14,7 +14,7 @@ type ViewMode = "summary" | "answers";
 //Tags 
 //Re-Parse if the model is updated 
 //Export Answers as a pdf document 
-//Handwritten Pdf scan 
+//Handwritten Pdf scan (far future)
 
 export default function Home() {
     const [file, setFile] = useState<File | null>(null);
