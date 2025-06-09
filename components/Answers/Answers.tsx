@@ -1,7 +1,5 @@
-import { useEffect, useState } from 'react';
-import { remark } from 'remark';
-import html from 'remark-html';
-import remarkGfm from 'remark-gfm'; // <-- Add this import
+import { useState } from 'react';
+import { MarkdownRenderer } from '../ui/MarkdownRenderer'; // <-- Import your MarkdownRenderer
 
 interface Question {
   question: string;
@@ -13,6 +11,7 @@ interface AnswersProps {
   context: string;
 }
 
+
 const Answers = ({ questions: initialQuestions, context }: AnswersProps) => {
   const [questions, setQuestions] = useState<Question[]>(initialQuestions);
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
@@ -22,20 +21,6 @@ const Answers = ({ questions: initialQuestions, context }: AnswersProps) => {
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editValue, setEditValue] = useState<string>('');
   const [newQuestion, setNewQuestion] = useState<string>('');
-  const [renderedMarkdown, setRenderedMarkdown] = useState<Record<number, string>>({});
-
-  useEffect(() => {
-    // Render markdown for all answers when answers change
-    Object.entries(answers).forEach(async ([idx, md]) => {
-      if (md) {
-        const file = await remark()
-          .use(remarkGfm) // <-- Add GFM support here
-          .use(html)
-          .process(md);
-        setRenderedMarkdown(prev => ({ ...prev, [idx]: String(file) }));
-      }
-    });
-  }, [answers]);
 
   const fetchAnswer = async (question: string, index: number) => {
     setLoading(prev => ({ ...prev, [index]: true }));
@@ -180,10 +165,8 @@ const Answers = ({ questions: initialQuestions, context }: AnswersProps) => {
                 ) : error ? (
                   <p className="text-red-500">{error}</p>
                 ) : answers[index] ? (
-                  <div
-                    className="prose dark:prose-invert max-w-none"
-                    dangerouslySetInnerHTML={{ __html: renderedMarkdown[index] || '' }}
-                  />
+                  
+                  <MarkdownRenderer content={answers[index]} />
                 ) : (
                   <p className="text-neutral-500">Fetching answer...</p>
                 )}

@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { remark } from 'remark';
-import html from 'remark-html';
-import remarkGfm from 'remark-gfm'; // <-- Add this import
+import { MarkdownRenderer } from '../ui/MarkdownRenderer';
 
 interface SummaryProps {
   file: File | null;
@@ -28,18 +26,7 @@ const Summary = ({ file, viewMode, summaryCache, setSummaryCache }: SummaryProps
   const [editValue, setEditValue] = useState<string>('');
   const [newTopic, setNewTopic] = useState<string>('');
   const [user, setUser] = useState<any>(null);
-  const [renderedMarkdown, setRenderedMarkdown] = useState<Record<number, string>>({});
 
-  // Get user on mount
-  useEffect(() => {
-    const getUser = async () => {
-      // Dynamically import supabaseClient to avoid SSR issues
-      const { supabase } = await import("@/lib/supabaseClient");
-      const { data } = await supabase.auth.getUser();
-      setUser(data.user);
-    };
-    getUser();
-  }, []);
 
   // Helper to get a unique key for the file (using name + size as a simple hash)
   const getFileKey = (f: File | null) => (f ? `${f.name}_${f.size}` : "");
@@ -169,19 +156,6 @@ const Summary = ({ file, viewMode, summaryCache, setSummaryCache }: SummaryProps
     setNewTopic('');
   };
 
-  // Render markdown for all topic details when topicDetails change
-  useEffect(() => {
-    Object.entries(topicDetails).forEach(async ([idx, md]) => {
-      if (md) {
-        const file = await remark()
-          .use(remarkGfm) // <-- Add GFM support here
-          .use(html)
-          .process(md);
-        setRenderedMarkdown(prev => ({ ...prev, [idx]: String(file) }));
-      }
-    });
-  }, [topicDetails]);
-
   if (viewMode !== "summary") return null;
   if (!file) return null;
   if (summaryLoading) return <p className="mt-2 text-center">Processing PDF...</p>;
@@ -256,10 +230,7 @@ const Summary = ({ file, viewMode, summaryCache, setSummaryCache }: SummaryProps
                 ) : error ? (
                   <p className="text-red-500">{error}</p>
                 ) : topicDetails[index] ? (
-                  <div
-                    className="prose dark:prose-invert max-w-none"
-                    dangerouslySetInnerHTML={{ __html: renderedMarkdown[index] || '' }}
-                  />
+                  <MarkdownRenderer content={topicDetails[index]} />
                 ) : (
                   <p className="text-neutral-500">Fetching topic details...</p>
                 )}
