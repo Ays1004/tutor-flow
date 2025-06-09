@@ -52,34 +52,6 @@ export default function Home() {
         }
     };
 
-    // Only fetch QnA when needed
-    const fetchData = async (mode: ViewMode, uploadedFile: File) => {
-        if (mode !== "answers") return;
-        try {
-            const formData = new FormData();
-            formData.append("file", uploadedFile);
-            formData.append("mode", mode);
-            const response = await fetch("/api/process-pdf", {
-                method: "POST",
-                body: formData,
-            });
-            if (!response.ok) throw new Error("Failed to process PDF");
-            const data = await response.json();
-            const fileKey = getFileKey(uploadedFile);
-            setQnaCache((prev) => ({
-                ...prev,
-                [fileKey]: { questions: data.questions, context: data.context },
-            }));
-            setQuestions(data.questions);
-            setContext(data.context);
-            setQnaLoading(false);
-        } catch (err) {
-            setQuestions(null);
-            setContext(null);
-            setQnaLoading(false);
-        }
-    };
-
     // Regenerate QnA when viewMode changes, using cache if available
     useEffect(() => {
         if (!file) return;
@@ -115,6 +87,37 @@ export default function Home() {
             listener.subscription.unsubscribe();
         };
     }, []);
+
+        // Only fetch QnA when needed
+    const fetchData = async (mode: ViewMode, uploadedFile: File) => {
+        if (mode !== "answers") return;
+        try {
+            const formData = new FormData();
+            formData.append("file", uploadedFile);
+            formData.append("mode", mode);
+            if (user?.id) {
+                formData.append("user_id", user.id); // Add user_id to form
+            }
+            const response = await fetch("/api/process-pdf", {
+                method: "POST",
+                body: formData,
+            });
+            if (!response.ok) throw new Error("Failed to process PDF");
+            const data = await response.json();
+            const fileKey = getFileKey(uploadedFile);
+            setQnaCache((prev) => ({
+                ...prev,
+                [fileKey]: { questions: data.questions, context: data.context },
+            }));
+            setQuestions(data.questions);
+            setContext(data.context);
+            setQnaLoading(false);
+        } catch (err) {
+            setQuestions(null);
+            setContext(null);
+            setQnaLoading(false);
+        }
+    };
 
     const login = async () => {
         await supabase.auth.signInWithOAuth({ provider: "google" });

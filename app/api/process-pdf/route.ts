@@ -1,14 +1,20 @@
 import { NextResponse } from "next/server";
 import PDFParser from "pdf2json";
 import axios from "axios";
+import { createClient } from "@supabase/supabase-js"; // Add this
 
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY); // Add this
 
 export async function POST(request: Request) {
     try {
         const formData = await request.formData();
         const file = formData.get("file") as File;
         const mode = formData.get("mode") as string;
+        const user_id = formData.get("user_id") as string; // Make sure user_id is sent in the form
 
         if (!file) {
             return NextResponse.json(
@@ -75,6 +81,27 @@ export async function POST(request: Request) {
             );
 
             const summary = groqRes.data.choices[0].message.content;
+
+            // Insert into Supabase
+            const { error: supabaseError } = await supabase
+                .from('user_question_data')
+                .insert([
+                    {
+                        user_id,
+                        title: file.name,
+                        context: text,
+                        summary,
+                        questions: null
+                    }
+                ]);
+            if (supabaseError) {
+                console.error("Supabase insert error:", supabaseError);
+                return NextResponse.json(
+                    { error: "Failed to save to database", details: supabaseError.message },
+                    { status: 500 }
+                );
+            }
+
             return NextResponse.json({ summary });
         } else {
             // Call Groq API for questions
@@ -115,6 +142,27 @@ export async function POST(request: Request) {
                     "Groq API did not return valid JSON for questions."
                 );
             }
+
+            // Insert into Supabase
+            const { error: supabaseError } = await supabase
+                .from('user_question_data')
+                .insert([
+                    {
+                        user_id,
+                        title: file.name,
+                        context: text,
+                        summary: null,
+                        questions
+                    }
+                ]);
+            if (supabaseError) {
+                console.error("Supabase insert error:", supabaseError);
+                return NextResponse.json(
+                    { error: "Failed to save to database", details: supabaseError.message },
+                    { status: 500 }
+                );
+            }
+
             return NextResponse.json({ questions, context: text });
         }
     } catch (error) {

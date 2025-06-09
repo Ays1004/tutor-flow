@@ -25,6 +25,18 @@ const Summary = ({ file, viewMode, summaryCache, setSummaryCache }: SummaryProps
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editValue, setEditValue] = useState<string>('');
   const [newTopic, setNewTopic] = useState<string>('');
+  const [user, setUser] = useState<any>(null);
+
+  // Get user on mount
+  useEffect(() => {
+    const getUser = async () => {
+      // Dynamically import supabaseClient to avoid SSR issues
+      const { supabase } = await import("@/lib/supabaseClient");
+      const { data } = await supabase.auth.getUser();
+      setUser(data.user);
+    };
+    getUser();
+  }, []);
 
   // Helper to get a unique key for the file (using name + size as a simple hash)
   const getFileKey = (f: File | null) => (f ? `${f.name}_${f.size}` : "");
@@ -55,6 +67,9 @@ const Summary = ({ file, viewMode, summaryCache, setSummaryCache }: SummaryProps
         const formData = new FormData();
         formData.append("file", file);
         formData.append("mode", "summary");
+        if (user?.id) {
+          formData.append("user_id", user.id); // Add user_id to form
+        }
         const response = await fetch("/api/process-pdf", {
           method: "POST",
           body: formData,
@@ -78,7 +93,7 @@ const Summary = ({ file, viewMode, summaryCache, setSummaryCache }: SummaryProps
     };
     fetchSummary();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [file, viewMode]);
+  }, [file, viewMode, user]);
 
   const fetchTopicDetail = async (topic: string, index: number) => {
     setLoading(prev => ({ ...prev, [index]: true }));
