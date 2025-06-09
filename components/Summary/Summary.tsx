@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { remark } from 'remark';
-import remarkStringify from 'remark-stringify';
+import html from 'remark-html'; // updated import
 
 interface SummaryProps {
   file: File | null;
@@ -172,7 +172,7 @@ const Summary = ({ file, viewMode, summaryCache, setSummaryCache }: SummaryProps
   useEffect(() => {
     Object.entries(topicDetails).forEach(async ([idx, md]) => {
       if (md) {
-        const file = await remark().use(remarkStringify).process(md);
+        const file = await remark().use(html).process(md); // use html plugin
         setRenderedMarkdown(prev => ({ ...prev, [idx]: String(file) }));
       }
     });
@@ -252,7 +252,10 @@ const Summary = ({ file, viewMode, summaryCache, setSummaryCache }: SummaryProps
                 ) : error ? (
                   <p className="text-red-500">{error}</p>
                 ) : topicDetails[index] ? (
-                  <pre className="whitespace-pre-wrap">{renderedMarkdown[index]}</pre>
+                  <div
+                    className="prose dark:prose-invert max-w-none"
+                    dangerouslySetInnerHTML={{ __html: renderedMarkdown[index] || '' }}
+                  />
                 ) : (
                   <p className="text-neutral-500">Fetching topic details...</p>
                 )}

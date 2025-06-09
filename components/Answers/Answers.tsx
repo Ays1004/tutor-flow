@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { remark } from 'remark';
-import remarkStringify from 'remark-stringify';
+import html from 'remark-html';
 
 interface Question {
   question: string;
@@ -27,7 +27,7 @@ const Answers = ({ questions: initialQuestions, context }: AnswersProps) => {
     // Render markdown for all answers when answers change
     Object.entries(answers).forEach(async ([idx, md]) => {
       if (md) {
-        const file = await remark().use(remarkStringify).process(md);
+        const file = await remark().use(html).process(md);
         setRenderedMarkdown(prev => ({ ...prev, [idx]: String(file) }));
       }
     });
@@ -176,7 +176,10 @@ const Answers = ({ questions: initialQuestions, context }: AnswersProps) => {
                 ) : error ? (
                   <p className="text-red-500">{error}</p>
                 ) : answers[index] ? (
-                  <pre className="whitespace-pre-wrap">{renderedMarkdown[index]}</pre>
+                  <div
+                    className="prose dark:prose-invert max-w-none"
+                    dangerouslySetInnerHTML={{ __html: renderedMarkdown[index] || '' }}
+                  />
                 ) : (
                   <p className="text-neutral-500">Fetching answer...</p>
                 )}
