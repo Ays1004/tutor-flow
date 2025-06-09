@@ -168,13 +168,20 @@ export default function Home() {
                 </div>
             </div>
 
-            <div className="mb-4">
+            <FileUpload onChange={handleFile} />
+            <div className="pb-2 text-gray-400 text-center">
+                Only supports parseable pdf files with scannable text for now.
+                (eg. Question Papers from University)
+            </div>
+
+
+            <div className="mb-7 mt-7">
                 <div className="flex gap-4 justify-center">
                     <button
                         onClick={() => setViewMode("summary")}
                         className={`px-4 py-2 rounded-md ${
                             viewMode === "summary"
-                                ? "bg-blue-500 text-white"
+                                ? "bg-slate-900 text-white"
                                 : "bg-neutral-100 dark:bg-neutral-800"
                         }`}
                     >
@@ -184,7 +191,7 @@ export default function Home() {
                         onClick={() => setViewMode("answers")}
                         className={`px-4 py-2 rounded-md ${
                             viewMode === "answers"
-                                ? "bg-blue-500 text-white"
+                                ? "bg-slate-900 text-white"
                                 : "bg-neutral-100 dark:bg-neutral-800"
                         }`}
                     >
@@ -192,11 +199,7 @@ export default function Home() {
                     </button>
                 </div>
             </div>
-            <FileUpload onChange={handleFile} />
-            <div className="pb-2 text-gray-400 text-center">
-                Only supports parseable pdf files with scannable text for now.
-                (eg. Question Papers from University)
-            </div>
+
             <Summary
                 file={file}
                 viewMode={viewMode}
