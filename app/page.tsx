@@ -129,7 +129,7 @@ export default function Home() {
 
     return (
         <div className="w-full max-w-4xl mx-auto min-h-96 border border-dashed bg-white dark:bg-black border-neutral-200 dark:border-neutral-800 rounded-lg p-4">
-            <div className="flex justify-between flex-row items-center pb-5">
+            <div className="justify-center flex-row items-center text-center pb-5">
                 <div className="pr-2">
                     <div className="pb-2 text-4xl font-bold">
                         Tutor-Flow{" "}
@@ -142,30 +142,7 @@ export default function Home() {
                         <span className="text-gray-950">all in one place</span>
                     </div>
                 </div>
-                <div className="">
-                    {user ? (
-                        <div>
-                            <span className="mr-2 text-sm text-gray-700">
-                                {user.email}
-                            </span>
-                            <button
-                                onClick={logout}
-                                className="px-3 py-1 bg-neutral-200 rounded hover:bg-neutral-300 text-sm"
-                            >
-                                Sign out
-                            </button>
-                        </div>
-                    ) : (
-                        <div>
-                            <button
-                                onClick={login}
-                                className="px-3 py-1 bg-neutral-200 rounded hover:bg-neutral-300 text-sm"
-                            >
-                                Login
-                            </button>
-                        </div>
-                    )}
-                </div>
+                
             </div>
 
             <FileUpload onChange={handleFile} />
