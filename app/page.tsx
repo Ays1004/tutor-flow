@@ -71,7 +71,7 @@ export default function Home() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [viewMode, file]);
 
-    // Check auth state on mount
+    // Check auth state on mount 
     useEffect(() => {
         const getUser = async () => {
             const { data } = await supabase.auth.getUser();
