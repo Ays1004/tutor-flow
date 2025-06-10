@@ -27,9 +27,13 @@ export default function Navbar() {
     getUser();
   }, []);
 
+  const login = async () => {
+        await supabase.auth.signInWithOAuth({ provider: "google" });
+    };
+    
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    router.push('/');
+    router.refresh;
   };
 
   const initials = userEmail?.[0]?.toUpperCase() || '?';
@@ -86,9 +90,9 @@ export default function Navbar() {
             </li>
           ) : (
             <li>
-              <Link href="/signin" className="text-blue-600 hover:underline">
+              <button onClick={login} className="text-blue-600 hover:underline">
                 Sign In
-              </Link>
+              </button>
             </li>
           )}
         </ul>
