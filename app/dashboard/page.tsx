@@ -19,13 +19,33 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
+  // Update handleDelete to accept an id and update state after deletion
+  const handleDelete = async (id: string) => {
+  const confirmed = window.confirm('Are you sure you want to delete this session? This action cannot be undone.');
+
+  if (!confirmed) return;
+
+  const { error } = await supabase
+    .from('user_question_data')
+    .delete()
+    .eq('id', id);
+
+  if (error) {
+    alert('Failed to delete session: ' + error.message);
+    return;
+  }
+
+  setSessions((prev) => prev.filter((session) => session.id !== id));
+};
+
+
   useEffect(() => {
     const fetchSessions = async () => {
       const {
         data: { user },
         error: authError,
       } = await supabase.auth.getUser();
-      console.log(user)
+      
 
       if (authError || !user) {
         console.error('Auth error:', authError?.message);
@@ -78,12 +98,21 @@ export default function Dashboard() {
                     Created: {new Date(session.created_at).toLocaleString()}
                   </p>
                 </div>
-                <button
-                  className="text-blue-500 hover:underline"
+                <div className='flex-col flex text-end'>
+                  <button
+                  className="text-blue-500 hover:underline pb-4"
                   onClick={() => router.push(`/view/${session.id}`)}
                 >
                   View ➜
                 </button>
+                <button
+                  className="text-red-500 hover:underline"
+                  onClick={() => handleDelete(session.id)}
+                >
+                  Delete ➜
+                </button>
+                </div>
+                
               </div>
               <p className="text-sm text-gray-700">
                 {session.summary?.length || 0} Topics • {session.questions?.length || 0} Questions
