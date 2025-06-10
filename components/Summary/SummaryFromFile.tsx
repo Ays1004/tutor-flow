@@ -19,7 +19,6 @@ const SummaryFromFile = ({ file, viewMode, summaryCache, setSummaryCache }: Summ
   const [error, setError] = useState<string | null>(null);
   const [topicDetails, setTopicDetails] = useState<Record<number, string>>({});
   const [context, setContext] = useState<string>("");
-  const [summaryRaw, setSummaryRaw] = useState<string | null>(null);
   const [summaryError, setSummaryError] = useState<string | null>(null);
   const [summaryLoading, setSummaryLoading] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
@@ -40,7 +39,6 @@ const SummaryFromFile = ({ file, viewMode, summaryCache, setSummaryCache }: Summ
     setTopicDetails({});
     setExpandedIndex(null);
     if (summaryCache[fileKey]) {
-      setSummaryRaw(summaryCache[fileKey]);
       setContext(summaryCache[fileKey]);
       try {
         const parsed = JSON.parse(summaryCache[fileKey]);
@@ -50,7 +48,6 @@ const SummaryFromFile = ({ file, viewMode, summaryCache, setSummaryCache }: Summ
       }
       return;
     }
-    setSummaryRaw(null);
     setSummaryLoading(true);
     const fetchSummary = async () => {
       try {
@@ -67,7 +64,6 @@ const SummaryFromFile = ({ file, viewMode, summaryCache, setSummaryCache }: Summ
         if (!response.ok) throw new Error("Failed to process PDF");
         const data = await response.json();
         setSummaryCache(prev => ({ ...prev, [fileKey]: data.summary }));
-        setSummaryRaw(data.summary);
         setContext(data.summary);
         try {
           const parsed = JSON.parse(data.summary);
