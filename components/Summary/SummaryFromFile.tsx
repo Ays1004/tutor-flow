@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { MarkdownRenderer } from "../ui/MarkdownRenderer";
+import { supabase } from "@/lib/supabaseClient";
 
 interface SummaryProps {
     file: File | null;
@@ -123,6 +124,23 @@ const SummaryFromFile = ({
             setLoading((prev) => ({ ...prev, [index]: false }));
         }
     };
+
+    // Check auth state on mount
+    useEffect(() => {
+        const getUser = async () => {
+            const { data } = await supabase.auth.getUser();
+            setUser(data.user);
+        };
+        getUser();
+        const { data: listener } = supabase.auth.onAuthStateChange(
+            (_event, session) => {
+                setUser(session?.user ?? null);
+            }
+        );
+        return () => {
+            listener.subscription.unsubscribe();
+        };
+    }, []);
 
     const handleTopicClick = (index: number) => {
         if (expandedIndex === index) {

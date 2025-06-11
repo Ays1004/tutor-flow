@@ -21,6 +21,8 @@ export async function POST(request: Request) {
         const file = formData.get("file") as File;
         const mode = formData.get("mode") as string;
         const user_id = formData.get("user_id") as string;
+        console.log("user_id from FormData:", user_id);
+
 
         if (!file) {
             return NextResponse.json(
@@ -89,7 +91,7 @@ export async function POST(request: Request) {
             );
 
             const summary = groqRes.data.choices[0].message.content;
-
+            
             // Insert into Supabase
             const { error: supabaseError } = await supabase
                 .from('user_question_data')
@@ -126,7 +128,7 @@ export async function POST(request: Request) {
                         {
                             role: "system",
                             content:
-                                'You are a helpful assistant. Extract all questions from the text. Your response must be a valid JSON array of objects, where each object has a "question" property. Example format: [{"question": "What is X?"}, {"question": "How does Y work?"}]. Do not include any other text or formatting, just the JSON array.',
+                                'You are a helpful assistant. Extract all questions from the text. Your response must be a **valid JSON array** of objects. Do not include ``` or any markdown, only the JSON array., where each object has a "question" property. Example format: [{"question": "What is X?"}, {"question": "How does Y work?"}]. Do not include any other text or formatting, just the JSON array.',
                         },
                         {
                             role: "user",
