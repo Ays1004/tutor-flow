@@ -119,14 +119,6 @@ export default function Home() {
         }
     };
 
-    const login = async () => {
-        await supabase.auth.signInWithOAuth({ provider: "google" });
-    };
-
-    const logout = async () => {
-        await supabase.auth.signOut();
-    };
-
     return (
         <div className="w-full max-w-4xl mx-auto min-h-96 border border-dashed bg-white dark:bg-black border-neutral-200 dark:border-neutral-800 rounded-lg p-4">
             <div className="justify-center flex-row items-center text-center pb-5">
