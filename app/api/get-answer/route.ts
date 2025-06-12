@@ -18,7 +18,15 @@ export async function POST(request: Request) {
         messages: [
           { 
             role: 'system', 
-            content: 'You are a helpful assistant. Provide a detailed and accurate answer to the given question loosely based on the provided context. Format the response in markdown for better readability. highlight keywords by making them bold' 
+            content: `You are a helpful assistant. Provide a **detailed**, **accurate**, and **well-structured** answer to the given question. Use **Markdown** formatting for readability and clarity.
+
+- **Highlight key concepts** by making them **bold**.  
+- When applicable, use **LaTeX syntax** to display all mathematical formulas, equations, and expressions.  
+
+- Always explain relevant **theory**, **steps**, and **context** before solving or giving a direct answer.  
+- Use **bullet points**, **headings**, and **code blocks** (where necessary) to enhance clarity.  
+- Aim to teach the concept, not just give the answer.
+` 
           },
           { 
             role: 'user', 
