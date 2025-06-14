@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { InputBox } from "@/components/InputBox/InputBox";
 
 interface LoginModalProps {
   open: boolean;
@@ -24,6 +25,7 @@ export function LoginModal({ open, setOpen, switchToSignup}: LoginModalProps) {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false); // Add this state
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,8 +33,11 @@ export function LoginModal({ open, setOpen, switchToSignup}: LoginModalProps) {
     setError(null);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) setError(error.message);
-    else setOpen(false);
+    else {setOpen(false)
+      window.location.href = '/'
+    };
     setLoading(false);
+    
   };
 
   const handleGoogle = async () => {
@@ -73,17 +78,17 @@ export function LoginModal({ open, setOpen, switchToSignup}: LoginModalProps) {
                   Forgot password?
                 </a>
               </div>
-              <Input
-                id="password"
+              <InputBox
                 type="password"
-                required
+                id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                required
               />
             </div>
             {error && <p className="text-sm text-red-500">{error}</p>}
             <div className="flex flex-col gap-3">
-              <Button type="submit" className="w-full" disabled={loading}>
+              <Button type="submit" onClick={handleLogin} className="w-full" disabled={loading}>
                 {loading ? "Logging in..." : "Login"}
               </Button>
               <Button variant="outline" className="w-full" type="button" onClick={handleGoogle}>
