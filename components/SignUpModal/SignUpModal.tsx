@@ -10,10 +10,7 @@ import {
     DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Eye, EyeOff } from "lucide-react"; // Add this import for icons
-import { toast } from "react-hot-toast"; // Changed from sonner to react-hot-toast
+import { Label } from "@/components/ui/label";import { toast } from "react-hot-toast"; // Changed from sonner to react-hot-toast
 import { InputBox } from "@/components/InputBox/InputBox";
 
 interface SignupModalProps {

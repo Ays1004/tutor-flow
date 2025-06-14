@@ -25,7 +25,6 @@ export function LoginModal({ open, setOpen, switchToSignup}: LoginModalProps) {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showPassword, setShowPassword] = useState(false); // Add this state
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
