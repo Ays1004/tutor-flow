@@ -127,11 +127,11 @@ export default function Home() {
                         Tutor-Flow{" "}
                         <span className="text-xl text-gray-600">beta</span>
                     </div>
-                    <div className="pb-2 text-gray-600">
+                    <div className="pb-2 text-gray-600 dark:text-gray-300 text-center">
                         Upload your question paper as a parseable PDF to get
                         instant summaries, important topics, and AI-generated
                         Q&A,{" "}
-                        <span className="text-gray-950">all in one place</span>
+                        <span className="text-gray-950 dark:text-sky-200">all in one place</span>
                     </div>
                 </div>
                 
