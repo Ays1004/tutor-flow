@@ -2,19 +2,16 @@
 
 import { useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
-import { cn } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
-  DialogClose,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { X } from "lucide-react";
 
 interface LoginModalProps {
   open: boolean;
