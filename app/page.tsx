@@ -123,7 +123,7 @@ export default function Home() {
         <div className="w-full max-w-4xl mx-auto min-h-96 border border-dashed bg-white dark:bg-black border-neutral-200 dark:border-neutral-800 rounded-lg p-4">
             <div className="justify-center flex-row items-center text-center pb-5">
                 <div className="pr-2">
-                    <div className="pb-2 text-4xl font-bold">
+                    <div className="pb-2 text-4xl font-bold dark:text-sky-200">
                         Tutor-Flow{" "}
                         <span className="text-xl text-gray-600">beta</span>
                     </div>
