@@ -12,13 +12,13 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { LoginModal } from "../LoginModal/LoginModal";
 
 export default function Navbar() {
     const pathname = usePathname();
-    const router = useRouter();
-
     const [userEmail, setUserEmail] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
+    const [loginOpen, setLoginOpen] = useState(false);
 
     useEffect(() => {
         const getUser = async () => {
@@ -49,7 +49,7 @@ export default function Navbar() {
 
     return (
         <nav className="bg-white shadow-md px-6 py-3 sticky top-0 z-50">
-            <div className="max-w-5xl mx-auto flex justify-between items-center">
+            <div className="max-w-5xl mx-auto min-h-9 flex justify-between items-center">
                 <Link href="/" className="text-xl font-bold text-blue-600">
                     Tutor-Flow
                 </Link>
@@ -80,8 +80,7 @@ export default function Navbar() {
                         </Link>
                     </li>
                     {loading ? (
-                        <div className="w-9 h-9 bg-blue-500 text-white rounded-full text-md font-bold flex items-center justify-center">
-                            ...
+                        <div className="w-9 h-9">
                         </div>
                     ) : userEmail ? (
                         <DropdownMenu>
@@ -108,14 +107,18 @@ export default function Navbar() {
                             </DropdownMenuContent>
                         </DropdownMenu>
                     ) : (
-                        <li>
-                            <button
-                                onClick={login}
-                                className="text-blue-600 hover:underline"
-                            >
-                                Sign In
-                            </button>
-                        </li>
+                        <div>
+                            <nav>
+                                <button onClick={() => setLoginOpen(true)}>
+                                    {" "}
+                                    Sign In
+                                </button>
+                            </nav>
+                            <LoginModal
+                                open={loginOpen}
+                                setOpen={setLoginOpen}
+                            />
+                        </div>
                     )}
                 </ul>
             </div>
