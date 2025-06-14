@@ -16,13 +16,14 @@ import { LoginModal } from "../LoginModal/LoginModal";
 
 import { useTheme } from "next-themes";
 import DarkModeToggle from "../DarkModeToggle/DarkModeToggle";
+import { SignupModal } from "../SignUpModal/SignUpModal";
 
 export default function Navbar() {
     const pathname = usePathname();
     const [userEmail, setUserEmail] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const [loginOpen, setLoginOpen] = useState(false);
-
+    const [signupOpen, setSignupOpen] = useState(false);
     useEffect(() => {
         const getUser = async () => {
             const {
@@ -108,17 +109,24 @@ export default function Navbar() {
                     ) : (
                         <div>
                             <nav>
-                                <button
-                                    onClick={() => setLoginOpen(true)}
-                                    className="text-blue-600 dark:text-blue-400 font-semibold"
-                                >
-                                    Sign In
-                                </button>
-                            </nav>
-                            <LoginModal
-                                open={loginOpen}
-                                setOpen={setLoginOpen}
-                            />
+        <button onClick={() => setLoginOpen(true)}>Sign In</button>
+      </nav>
+      <LoginModal
+        open={loginOpen}
+        setOpen={setLoginOpen}
+        switchToSignup={() => {
+          setLoginOpen(false);
+          setSignupOpen(true);
+        }}
+      />
+      <SignupModal
+        open={signupOpen}
+        setOpen={setSignupOpen}
+        switchToLogin={() => {
+          setSignupOpen(false);
+          setLoginOpen(true);
+        }}
+      />
                         </div>
                     )}
                 </ul>

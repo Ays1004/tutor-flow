@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
-import { cn } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
@@ -16,23 +15,23 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { X } from "lucide-react";
 
-interface LoginModalProps {
+interface SignupModalProps {
   open: boolean;
   setOpen: (open: boolean) => void;
-  switchToSignup: () => void;
+  switchToLogin: () => void;
 }
 
-export function LoginModal({ open, setOpen, switchToSignup}: LoginModalProps) {
+export function SignupModal({ open, setOpen, switchToLogin }: SignupModalProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error } = await supabase.auth.signUp({ email, password });
     if (error) setError(error.message);
     else setOpen(false);
     setLoading(false);
@@ -47,13 +46,13 @@ export function LoginModal({ open, setOpen, switchToSignup}: LoginModalProps) {
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="flex justify-between items-center">
-            Login to your account
+            Create your account
           </DialogTitle>
           <DialogDescription>
-            Enter your email below to login to your account
+            Sign up with email and password to get started
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleLogin}>
+        <form onSubmit={handleSignup}>
           <div className="grid gap-6 mt-4">
             <div className="grid gap-3">
               <Label htmlFor="email">Email</Label>
@@ -67,15 +66,7 @@ export function LoginModal({ open, setOpen, switchToSignup}: LoginModalProps) {
               />
             </div>
             <div className="grid gap-3">
-              <div className="flex items-center">
-                <Label htmlFor="password">Password</Label>
-                <a
-                  href="#"
-                  className="ml-auto text-sm underline hover:underline-offset-2"
-                >
-                  Forgot password?
-                </a>
-              </div>
+              <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
                 type="password"
@@ -87,17 +78,17 @@ export function LoginModal({ open, setOpen, switchToSignup}: LoginModalProps) {
             {error && <p className="text-sm text-red-500">{error}</p>}
             <div className="flex flex-col gap-3">
               <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? "Logging in..." : "Login"}
+                {loading ? "Signing up..." : "Sign Up"}
               </Button>
               <Button variant="outline" className="w-full" type="button" onClick={handleGoogle}>
-                Login with Google
+                Continue with Google
               </Button>
             </div>
           </div>
           <div className="mt-4 text-center text-sm">
-            Don&apos;t have an account?{" "}
-            <a onClick={switchToSignup} className="underline underline-offset-4 cursor-pointer">
-              Sign up
+            Already have an account?{" "}
+            <a onClick={switchToLogin} className="underline underline-offset-4 cursor-pointer">
+              Login
             </a>
           </div>
         </form>
