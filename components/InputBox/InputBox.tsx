@@ -31,7 +31,13 @@ export function InputBox({
             <div className="relative">
                 <Input
                     id={id}
-                    type={type ? type : showPassword ? "text" : "password"}
+                    type={
+                        type === "password"
+                            ? showPassword
+                                ? "text"
+                                : "password"
+                            : type || "text"
+                    }
                     value={value}
                     onChange={onChange}
                     placeholder={placeholder}
@@ -50,9 +56,9 @@ export function InputBox({
                         }
                     >
                         {showPassword ? (
-                            <EyeOff size={18} />
-                        ) : (
                             <Eye size={18} />
+                        ) : (
+                            <EyeOff size={18} />
                         )}
                     </button>
                 ) : (
