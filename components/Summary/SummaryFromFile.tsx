@@ -64,16 +64,28 @@ const SummaryFromFile = ({
             try {
                 const formData = new FormData();
                 formData.append("file", file);
-                formData.append("mode", "summary");
                 if (user?.id) {
                     formData.append("user_id", user.id); // Add user_id to form
                 }
-                const response = await fetch("/api/process-pdf", {
+                // Step 1: Extract text from PDF
+                const processRes = await fetch("/api/process-pdf", {
                     method: "POST",
                     body: formData,
                 });
-                if (!response.ok) throw new Error("Failed to process PDF");
-                const data = await response.json();
+                if (!processRes.ok) throw new Error("Failed to process PDF");
+                const processData = await processRes.json();
+                // Step 2: Generate summary from extracted text
+                const summaryRes = await fetch("/api/summary", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        user_id: processData.user_id,
+                        title: processData.title,
+                        context: processData.context,
+                    }),
+                });
+                if (!summaryRes.ok) throw new Error("Failed to generate summary");
+                const data = await summaryRes.json();
                 setSummaryCache((prev) => ({
                     ...prev,
                     [fileKey]: data.summary,
