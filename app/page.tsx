@@ -7,15 +7,6 @@ import SummaryFromFile from "@/components/Summary/SummaryFromFile";
 
 type ViewMode = "summary" | "answers";
 
-//Track Metadata -
-//User Dashboard 
-//History of summaries 
-//Multiple PDFs 
-//Tags 
-//Re-Parse if the model is updated 
-//Export Answers as a pdf document 
-//Handwritten Pdf scan (far future)
-
 export default function Home() {
     const [file, setFile] = useState<File | null>(null);
     const [summaryCache, setSummaryCache] = useState<Record<string, string>>(
