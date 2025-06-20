@@ -13,12 +13,12 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { LoginModal } from "../LoginModal/LoginModal";
-
-import { useTheme } from "next-themes";
 import DarkModeToggle from "../DarkModeToggle/DarkModeToggle";
 import { SignupModal } from "../SignUpModal/SignUpModal";
+import { useRouter } from "next/navigation";
 
 export default function Navbar() {
+    const router = useRouter();
     const pathname = usePathname();
     const [userEmail, setUserEmail] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
@@ -87,10 +87,12 @@ export default function Navbar() {
                                     My Account
                                 </DropdownMenuLabel>
                                 <DropdownMenuSeparator />
-                                <DropdownMenuItem>Profile</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => {
+                                    router.push('/profile')
+                                }}>Profile</DropdownMenuItem>
                                 <DropdownMenuItem
                                     onClick={() => {
-                                        window.location.href = "/dashboard";
+                                        router.push('/dashboard')
                                     }}
                                 >
                                     Dashboard
