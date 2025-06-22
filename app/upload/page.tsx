@@ -23,6 +23,7 @@ export default function Home() {
     const [viewMode, setViewMode] = useState<ViewMode>("summary");
     const [qnaLoading, setQnaLoading] = useState(false);
     const [user, setUser] = useState<any>(null);
+    const [authLoading, setAuthLoading] = useState(true); // <-- Add loading state
 
     // Helper to get a unique key for the file (using name + size as a simple hash)
     const getFileKey = (f: File | null) => (f ? `${f.name}_${f.size}` : "");
@@ -68,11 +69,13 @@ export default function Home() {
         const getUser = async () => {
             const { data } = await supabase.auth.getUser();
             setUser(data.user);
+            setAuthLoading(false); // <-- Set loading false after check
         };
         getUser();
         const { data: listener } = supabase.auth.onAuthStateChange(
             (_event, session) => {
                 setUser(session?.user ?? null);
+                setAuthLoading(false); // <-- Set loading false after change
             }
         );
         return () => {
@@ -80,7 +83,7 @@ export default function Home() {
         };
     }, []);
 
-        // Only fetch QnA when needed
+    // Only fetch QnA when needed
     const fetchData = async (mode: ViewMode, uploadedFile: File) => {
         if (mode !== "answers") return;
         try {
@@ -122,6 +125,20 @@ export default function Home() {
             setQnaLoading(false);
         }
     };
+
+    if (authLoading) {
+        return (
+            <div className="w-full max-w-4xl h-screen mx-auto min-h-96 border border-dashed bg-white dark:bg-black border-neutral-200 dark:border-neutral-800 rounded-2xl p-4 flex items-center justify-center shadow-md mt-6">
+                <div className="flex flex-col items-center justify-center w-full">
+                    <svg className="animate-spin h-8 w-8 text-sky-500 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                    </svg>
+                    <div className="text-lg font-semibold text-slate-900 dark:text-sky-200">Checking authentication...</div>
+                </div>
+            </div>
+        );
+    }
 
     if (!user) {
         return (
