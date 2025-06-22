@@ -112,83 +112,124 @@ export default function ProfilePage() {
     };
 
     return (
-        <div className="max-w-xl mx-auto py-10">
-            <h1 className="text-2xl font-bold mb-6">Your Profile</h1>
+        <div className="max-w-xl mx-auto py-8 px-4 sm:px-6 lg:px-8 w-full">
+            <div className="mb-8">
+                <h1 className="text-3xl font-bold mb-2 text-foreground">
+                    Your Profile
+                </h1>
+                <p className="text-muted-foreground text-sm">
+                    Manage your account information
+                </p>
+            </div>
 
-            {loading ? (
-                <p>Loading...</p>
-            ) : (
-                <div className="space-y-4">
-                    <Avatar className="w-24 h-24">
-                        <AvatarImage src={avatarUrl || "/public/avatar.png"} />
-                        <AvatarFallback>
-                            {email?.charAt(0).toUpperCase()}
-                        </AvatarFallback>
-                    </Avatar>
+            <div className="bg-card rounded-xl shadow-md p-6 sm:p-8 flex flex-col items-center gap-6 border border-border">
+                <Avatar className="w-24 h-24 border-4 border-primary bg-background">
+                    <AvatarImage src={avatarUrl || "/avatar.png"} />
+                    <AvatarFallback className="bg-muted text-lg">
+                        {email?.charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                </Avatar>
 
-                    <div>
-                        <label className="block text-sm font-medium mb-1">
-                            Email
-                        </label>
-                        <Input value={email} disabled />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium mb-1">
-                            Username
-                        </label>
-                        <Input
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
-                            placeholder="Your name"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium mb-1">
-                            Bio
-                        </label>
-                        <Input
-                            value={bio}
-                            onChange={(e) => setBio(e.target.value)}
-                            placeholder="Short bio"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium mb-1">
-                            Avatar URL
-                        </label>
-                        <Input
-                            value={avatarUrl}
-                            onChange={(e) => setAvatarUrl(e.target.value)}
-                            placeholder="Avatar image URL"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium mb-1">
-                            Occupation
-                        </label>
-                        <Input
-                            value={occupation}
-                            onChange={(e) => setOccupation(e.target.value)}
-                            placeholder="What do you do?"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium mb-1">
-                            Date of Birth
-                        </label>
-                        <Input
-                            type="date"
-                            value={dob ? dob.slice(0, 10) : ""}
-                            onChange={(e) => setDob(e.target.value)}
-                            placeholder="YYYY-MM-DD"
-                        />
-                    </div>
-                    <Button onClick={handleUpdate}>Update Profile</Button>
-                    <Button className="bg-red-600 mx-2" onClick={handleDelete}>
-                        Delete Account
-                    </Button>
-                </div>
-            )}
+                {loading ? (
+                    <p className="text-center text-muted-foreground">Loading...</p>
+                ) : (
+                    <form
+                        className="w-full flex flex-col gap-4"
+                        onSubmit={(e) => {
+                            e.preventDefault();
+                            handleUpdate();
+                        }}
+                    >
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-xs font-medium mb-1 text-muted-foreground">
+                                    Email
+                                </label>
+                                <Input
+                                    value={email}
+                                    disabled
+                                    className="bg-muted/50"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-medium mb-1 text-muted-foreground">
+                                    Username
+                                </label>
+                                <Input
+                                    value={username}
+                                    onChange={(e) => setUsername(e.target.value)}
+                                    placeholder="Your name"
+                                    className="bg-background"
+                                />
+                            </div>
+                            <div className="sm:col-span-2">
+                                <label className="block text-xs font-medium mb-1 text-muted-foreground">
+                                    Bio
+                                </label>
+                                <textarea
+                                    value={bio}
+                                    onChange={(e) => setBio(e.target.value)}
+                                    placeholder="Short bio"
+                                    rows={5}
+                                    className="bg-muted/50 border rounded-md w-full p-2 text-foreground resize-none min-h-[100px]  "
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-medium mb-1 text-muted-foreground">
+                                    Avatar URL
+                                </label>
+                                <Input
+                                    value={avatarUrl}
+                                    onChange={(e) => setAvatarUrl(e.target.value)}
+                                    placeholder="Avatar image URL"
+                                    className="bg-background"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-medium mb-1 text-muted-foreground">
+                                    Occupation
+                                </label>
+                                <Input
+                                    value={occupation}
+                                    onChange={(e) => setOccupation(e.target.value)}
+                                    placeholder="What do you do?"
+                                    className="bg-background"
+                                />
+                            </div>
+                            <div className="sm:col-span-2">
+                                <label className="block text-xs font-medium mb-1 text-muted-foreground">
+                                    Date of Birth
+                                </label>
+                                <Input
+                                    type="date"
+                                    value={dob ? dob.slice(0, 10) : ""}
+                                    onChange={(e) => setDob(e.target.value)}
+                                    placeholder="YYYY-MM-DD"
+                                    className="bg-background"
+                                />
+                            </div>
+                        </div>
+                        <div className="flex flex-col sm:flex-row gap-3 mt-6 w-full">
+                            <Button
+                                type="submit"
+                                className="w-full sm:w-auto"
+                                disabled={loading}
+                            >
+                                {loading ? "Updating..." : "Update Profile"}
+                            </Button>
+                            <Button
+                                type="button"
+                                variant="destructive"
+                                className="w-full sm:w-auto"
+                                onClick={handleDelete}
+                                disabled={loading}
+                            >
+                                Delete Account
+                            </Button>
+                        </div>
+                    </form>
+                )}
+            </div>
         </div>
     );
 }
