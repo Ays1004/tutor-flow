@@ -127,7 +127,7 @@ export default function Home() {
         return (
             <div className="w-full max-w-4xl mx-auto min-h-96 border border-dashed bg-white dark:bg-black border-neutral-200 dark:border-neutral-800 rounded-2xl p-4 flex items-center justify-center shadow-md mt-6">
                 <div className="text-center">
-                    <div className="text-2xl font-bold mb-2 dark:text-sky-200 text-slate-900 dark:text-sky-200">
+                    <div className="text-2xl font-bold mb-2 text-slate-900 dark:text-sky-200">
                         Please login to access this page
                     </div>
                     <div className="text-gray-600 dark:text-gray-300 mb-4">
