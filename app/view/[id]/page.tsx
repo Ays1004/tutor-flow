@@ -52,36 +52,36 @@ export default function SessionDetailPage() {
     fetchSession();
   }, [id]);
 
-  if (loading) return <p className="p-6">Loading session details...</p>;
-  if (!session) return <p className="p-6">Session not found.</p>;
+  if (loading) return <p className="p-6 text-center text-gray-700 dark:text-gray-300">Loading session details...</p>;
+  if (!session) return <p className="p-6 text-center text-gray-600 dark:text-gray-400">Session not found.</p>;
 
   return (
-    <div className="p-6 max-w-4xl mx-auto space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">{session.title}</h1>
-        <p className="text-sm text-gray-500">
+    <div className="p-4 sm:p-6 max-w-4xl mx-auto space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+        <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 break-words">{session.title}</h1>
+        <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
           {new Date(session.created_at).toLocaleString()}
         </p>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-4 justify-center mb-4">
+      <div className="flex gap-2 sm:gap-4 justify-center mb-2 sm:mb-4">
         <button
           onClick={() => setViewMode('summary')}
-          className={`px-4 py-2 rounded-md ${
+          className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 dark:focus:ring-slate-600 ${
             viewMode === 'summary'
-              ? 'bg-slate-900 text-white'
-              : 'bg-neutral-100 dark:bg-neutral-800'
+              ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 shadow'
+              : 'bg-neutral-100 dark:bg-neutral-800 text-slate-900 dark:text-slate-100'
           }`}
         >
           Summary
         </button>
         <button
           onClick={() => setViewMode('answers')}
-          className={`px-4 py-2 rounded-md ${
+          className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 dark:focus:ring-slate-600 ${
             viewMode === 'answers'
-              ? 'bg-slate-900 text-white'
-              : 'bg-neutral-100 dark:bg-neutral-800'
+              ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 shadow'
+              : 'bg-neutral-100 dark:bg-neutral-800 text-slate-900 dark:text-slate-100'
           }`}
         >
           Questions & Answers
@@ -89,17 +89,14 @@ export default function SessionDetailPage() {
       </div>
 
       {/* Tab content */}
-      {viewMode === 'summary' && (
-        <section>
+      <section className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg shadow-sm p-4 sm:p-6 transition-colors">
+        {viewMode === 'summary' && (
           <Summary initialTopics={session.summary} context={session.context} />
-        </section>
-      )}
-
-      {viewMode === 'answers' && (
-        <section>
+        )}
+        {viewMode === 'answers' && (
           <Answers initialQuestions={session.questions} context={session.context} />
-        </section>
-      )}
+        )}
+      </section>
     </div>
   );
 }

@@ -80,43 +80,40 @@ export default function Dashboard() {
     fetchSessions();
   }, []);
 
-  if (loading) return <p className="p-6">Loading your sessions...</p>;
+  if (loading) return <p className="p-6 text-center text-gray-700 dark:text-gray-300">Loading your sessions...</p>;
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6">📚 Your Sessions</h1>
+    <div className="p-4 sm:p-6 max-w-4xl mx-auto">
+      <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-slate-900 dark:text-slate-100">📚 Your Sessions</h1>
       {sessions.length === 0 ? (
-        <p>No summaries or Q&As found. Upload a PDF to get started!</p>
+        <p className="text-center text-gray-600 dark:text-gray-400">No summaries or Q&As found. Upload a PDF to get started!</p>
       ) : (
-        <ul className="space-y-6">
+        <ul className="space-y-4 sm:space-y-6">
           {sessions.map((session) => (
-            <li key={session.id} className="p-4 border rounded-md shadow-sm">
-              <div className="flex justify-between items-center mb-2">
-                <div>
-                  <p className="font-semibold">{session.title}</p>
-                  <p className="text-sm text-gray-500">
-                    Created: {new Date(session.created_at).toLocaleString()}
-                  </p>
-                </div>
-                <div className='flex-col flex text-end'>
-                  <button
-                  className="text-blue-500 hover:underline pb-4"
+            <li key={session.id} className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg shadow-sm p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 transition-colors">
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-lg text-slate-900 dark:text-slate-100 truncate">{session.title}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  Created: {new Date(session.created_at).toLocaleString()}
+                </p>
+                <p className="text-xs text-gray-700 dark:text-gray-300 mt-2">
+                  {session.summary?.length || 0} Topics • {session.questions?.length || 0} Questions
+                </p>
+              </div>
+              <div className="flex flex-row sm:flex-col gap-2 sm:gap-0 sm:items-end">
+                <button
+                  className="px-3 py-1 rounded-md bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 text-sm font-medium hover:bg-slate-700 dark:hover:bg-slate-200 transition-colors mb-0 sm:mb-2"
                   onClick={() => router.push(`/view/${session.id}`)}
                 >
                   View ➜
                 </button>
                 <button
-                  className="text-red-500 hover:underline"
+                  className="px-3 py-1 rounded-md bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200 text-sm font-medium hover:bg-red-200 dark:hover:bg-red-800 transition-colors"
                   onClick={() => handleDelete(session.id)}
                 >
                   Delete ➜
                 </button>
-                </div>
-                
               </div>
-              <p className="text-sm text-gray-700">
-                {session.summary?.length || 0} Topics • {session.questions?.length || 0} Questions
-              </p>
             </li>
           ))}
         </ul>
