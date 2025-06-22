@@ -1,12 +1,37 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion } from "motion/react";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabaseClient";
 import { LoginModal } from "@/components/LoginModal/LoginModal";
 import { SignupModal } from "@/components/SignUpModal/SignUpModal";
 
 export default function LandingPage() {
   const [loginOpen, setLoginOpen] = useState(false);
   const [signupOpen, setSignupOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsLoggedIn(!!session);
+    });
+    // Listen for auth changes
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsLoggedIn(!!session);
+    });
+    return () => {
+      listener.subscription.unsubscribe();
+    };
+  }, []);
+
+  const handleUploadClick = useCallback(() => {
+    if (isLoggedIn) {
+      router.push("/upload");
+    } else {
+      setLoginOpen(true);
+    }
+  }, [isLoggedIn, router]);
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-white via-gray-100 to-gray-200 dark:from-[#101010] dark:via-[#212121] dark:to-[#353535] flex flex-col items-center justify-center px-4">
@@ -36,7 +61,7 @@ export default function LandingPage() {
       >
         <button
           className="px-6 py-3 bg-blue-600 text-white rounded-2xl font-semibold text-lg shadow-lg hover:bg-blue-700 transition w-full md:w-auto"
-          onClick={() => setLoginOpen(true)}
+          onClick={handleUploadClick}
         >
           Upload PDF
         </button>
