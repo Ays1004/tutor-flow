@@ -4,6 +4,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { FileUpload } from "@/components/ui/file-upload";
 import Answers from "@/components/Answers/Answers";
 import SummaryFromFile from "@/components/Summary/SummaryFromFile";
+import { motion } from "framer-motion";
 
 type ViewMode = "summary" | "answers";
 
@@ -124,9 +125,9 @@ export default function Home() {
 
     if (!user) {
         return (
-            <div className="w-full max-w-4xl mx-auto min-h-96 border border-dashed bg-white dark:bg-black border-neutral-200 dark:border-neutral-800 rounded-lg p-4 flex items-center justify-center">
+            <div className="w-full max-w-4xl mx-auto min-h-96 border border-dashed bg-white dark:bg-black border-neutral-200 dark:border-neutral-800 rounded-2xl p-4 flex items-center justify-center shadow-md mt-6">
                 <div className="text-center">
-                    <div className="text-2xl font-bold mb-2 dark:text-sky-200">
+                    <div className="text-2xl font-bold mb-2 dark:text-sky-200 text-slate-900 dark:text-sky-200">
                         Please login to access this page
                     </div>
                     <div className="text-gray-600 dark:text-gray-300 mb-4">
@@ -138,67 +139,81 @@ export default function Home() {
     }
 
     return (
-        <div className="w-full max-w-4xl mx-auto min-h-96 border border-dashed bg-white dark:bg-black border-neutral-200 dark:border-neutral-800 rounded-lg p-4">
-            <div className="justify-center flex-row items-center text-center pb-5">
-                <div className="pr-2">
-                    <div className="pb-2 text-4xl font-bold dark:text-sky-200">
-                        Tutor-Flow{" "}
-                        <span className="text-xl text-gray-600">beta</span>
-                    </div>
-                    <div className="pb-2 text-gray-600 dark:text-gray-300 text-center">
-                        Upload your question paper as a parseable PDF to get
-                        instant summaries, important topics, and AI-generated
-                        Q&A,{" "}
-                        <span className="text-gray-950 dark:text-sky-200">all in one place</span>
-                    </div>
+        <div className="w-full max-w-2xl lg:max-w-4xl xl:max-w-5xl mx-auto min-h-96 border border-dashed bg-white dark:bg-black border-neutral-200 dark:border-neutral-800 rounded-2xl p-4 shadow-md mt-6 flex flex-col gap-4">
+            <motion.div
+                className="flex flex-col items-center justify-center text-center gap-2 pb-3"
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, type: "spring" }}
+            >
+                <motion.div
+                    className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-extrabold dark:text-sky-200 text-slate-900 flex items-center gap-2"
+                    initial={{ scale: 0.95 }}
+                    animate={{ scale: 1 }}
+                    transition={{ duration: 0.7, type: "spring" }}
+                >
+                    Tutor-Flow
+                    <motion.span
+                        className="text-base sm:text-xl lg:text-2xl xl:text-3xl text-gray-600 dark:text-sky-300 font-semibold ml-2"
+                        initial={{ opacity: 0, x: 10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.5, duration: 0.6 }}
+                    >
+                        beta
+                    </motion.span>
+                </motion.div>
+                <div className="text-gray-600 dark:text-gray-300 text-sm sm:text-base lg:text-lg xl:text-xl max-w-md lg:max-w-2xl xl:max-w-3xl mx-auto">
+                    Upload your question paper as a parseable PDF to get
+                    instant summaries, important topics, and AI-generated Q&A,
+                    <span className="text-gray-950 dark:text-sky-200 font-semibold ml-1">all in one place</span>
                 </div>
-                
-            </div>
+            </motion.div>
 
-            <FileUpload onChange={handleFile} />
-            <div className="pb-2 text-gray-400 text-center">
-                Only supports parseable pdf files with scannable text for now.
-                (eg. Question Papers from University)
-            </div>
-
-
-            <div className="mb-7 mt-7">
-                <div className="flex gap-4 justify-center">
-                    <button
-                        onClick={() => setViewMode("summary")}
-                        className={`px-4 py-2 rounded-md ${
-                            viewMode === "summary"
-                                ? "bg-slate-900 text-white"
-                                : "bg-neutral-100 dark:bg-neutral-800"
-                        }`}
-                    >
-                        Summary
-                    </button>
-                    <button
-                        onClick={() => setViewMode("answers")}
-                        className={`px-4 py-2 rounded-md ${
-                            viewMode === "answers"
-                                ? "bg-slate-900 text-white"
-                                : "bg-neutral-100 dark:bg-neutral-800"
-                        }`}
-                    >
-                        Questions & Answers
-                    </button>
+            <div className="w-full flex flex-col items-center gap-2">
+                <FileUpload onChange={handleFile} />
+                <div className="text-xs text-gray-400 text-center mt-1">
+                    Only supports parseable PDF files with scannable text for now.<br className="hidden sm:block" />
+                    (e.g. Question Papers from University)
                 </div>
             </div>
 
-            <SummaryFromFile
-                file={file}
-                viewMode={viewMode}
-                summaryCache={summaryCache}
-                setSummaryCache={setSummaryCache}
-            />
-            {viewMode === "answers" &&
-                (qnaLoading ? (
-                    <p className="mt-2 text-center">Processing PDF...</p>
-                ) : questions && context ? (
-                    <Answers initialQuestions={questions} context={context} />
-                ) : null)}
+            <div className="flex flex-col sm:flex-row gap-3 justify-center items-center mt-4">
+                <button
+                    onClick={() => setViewMode("summary")}
+                    className={`px-4 py-2 rounded-md font-medium transition-colors duration-200 shadow-sm border border-transparent focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-black
+                        ${viewMode === "summary"
+                            ? "bg-slate-900 text-white dark:bg-sky-800 dark:text-sky-100"
+                            : "bg-neutral-100 dark:bg-neutral-800 text-slate-900 dark:text-sky-200 hover:bg-neutral-200 dark:hover:bg-neutral-700"}
+                    `}
+                >
+                    Summary
+                </button>
+                <button
+                    onClick={() => setViewMode("answers")}
+                    className={`px-4 py-2 rounded-md font-medium transition-colors duration-200 shadow-sm border border-transparent focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-black
+                        ${viewMode === "answers"
+                            ? "bg-slate-900 text-white dark:bg-sky-800 dark:text-sky-100"
+                            : "bg-neutral-100 dark:bg-neutral-800 text-slate-900 dark:text-sky-200 hover:bg-neutral-200 dark:hover:bg-neutral-700"}
+                    `}
+                >
+                    Questions & Answers
+                </button>
+            </div>
+
+            <div className="mt-4">
+                <SummaryFromFile
+                    file={file}
+                    viewMode={viewMode}
+                    summaryCache={summaryCache}
+                    setSummaryCache={setSummaryCache}
+                />
+                {viewMode === "answers" &&
+                    (qnaLoading ? (
+                        <p className="mt-2 text-center text-sky-500 dark:text-sky-300 animate-pulse">Processing PDF...</p>
+                    ) : questions && context ? (
+                        <Answers initialQuestions={questions} context={context} />
+                    ) : null)}
+            </div>
         </div>
     );
 }
