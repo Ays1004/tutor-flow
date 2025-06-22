@@ -16,11 +16,13 @@ import { LoginModal } from "../LoginModal/LoginModal";
 import DarkModeToggle from "../DarkModeToggle/DarkModeToggle";
 import { SignupModal } from "../SignUpModal/SignUpModal";
 import { useRouter } from "next/navigation";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 export default function Navbar() {
     const router = useRouter();
     const pathname = usePathname();
     const [userEmail, setUserEmail] = useState<string | null>(null);
+    const [avatarUrl, setAvatarUrl] = useState<string>("/avatar.png");
     const [loading, setLoading] = useState(true);
     const [loginOpen, setLoginOpen] = useState(false);
     const [signupOpen, setSignupOpen] = useState(false);
@@ -33,6 +35,17 @@ export default function Navbar() {
 
             if (user) {
                 setUserEmail(user.email ?? null);
+                // Fetch avatar from profiles table
+                const { data: profile, error: profileError } = await supabase
+                    .from("profiles")
+                    .select("avatar_url")
+                    .eq("id", user.id)
+                    .single();
+                if (profile && profile.avatar_url) {
+                    setAvatarUrl(profile.avatar_url);
+                } else {
+                    setAvatarUrl("/avatar.png");
+                }
             }
             setLoading(false);
         };
@@ -78,9 +91,10 @@ export default function Navbar() {
                     ) : userEmail ? (
                         <DropdownMenu>
                             <DropdownMenuTrigger>
-                                <div className="w-9 h-9 bg-blue-500 dark:bg-blue-700 text-white rounded-full text-md font-bold flex items-center justify-center">
-                                    {initials}
-                                </div>
+                                <Avatar className="w-9 h-9">
+                                    <AvatarImage src={avatarUrl} />
+                                    <AvatarFallback>{initials}</AvatarFallback>
+                                </Avatar>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent>
                                 <DropdownMenuLabel>
