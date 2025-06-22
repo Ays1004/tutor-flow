@@ -1,189 +1,111 @@
 "use client";
-import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabaseClient";
-import { FileUpload } from "@/components/ui/file-upload";
-import Answers from "@/components/Answers/Answers";
-import SummaryFromFile from "@/components/Summary/SummaryFromFile";
+import { useState } from "react";
+import { motion } from "motion/react";
+import { LoginModal } from "@/components/LoginModal/LoginModal";
+import { SignupModal } from "@/components/SignUpModal/SignUpModal";
 
-type ViewMode = "summary" | "answers";
+export default function LandingPage() {
+  const [loginOpen, setLoginOpen] = useState(false);
+  const [signupOpen, setSignupOpen] = useState(false);
 
-export default function Home() {
-    const [file, setFile] = useState<File | null>(null);
-    const [summaryCache, setSummaryCache] = useState<Record<string, string>>(
-        {}
-    );
-    const [qnaCache, setQnaCache] = useState<
-        Record<string, { questions: { question: string }[]; context: string }>
-    >({});
-    const [questions, setQuestions] = useState<Array<{
-        question: string;
-    }> | null>(null);
-    const [context, setContext] = useState<string | null>(null);
-    const [viewMode, setViewMode] = useState<ViewMode>("summary");
-    const [qnaLoading, setQnaLoading] = useState(false);
-    const [user, setUser] = useState<any>(null);
+  return (
+    <main className="min-h-screen bg-gradient-to-br from-white via-gray-100 to-gray-200 dark:from-[#101010] dark:via-[#212121] dark:to-[#353535] flex flex-col items-center justify-center px-4">
+      <motion.h1
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7 }}
+        className="text-4xl pt-5 md:text-6xl font-extrabold text-gray-900 dark:text-white text-center mb-6"
+      >
+        Tutor-Flow
+      </motion.h1>
 
-    // Helper to get a unique key for the file (using name + size as a simple hash)
-    const getFileKey = (f: File | null) => (f ? `${f.name}_${f.size}` : "");
+      <motion.p
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, delay: 0.2 }}
+        className="text-lg md:text-2xl text-gray-700 dark:text-gray-200 text-center mb-10 max-w-2xl"
+      >
+        Your all-in-one AI-powered study assistant. Instantly get summaries and Q&A from any university PDF.
+      </motion.p>
 
-    const handleFile = async (files: File[]) => {
-        const uploadedFile = files?.[0];
-        if (!uploadedFile) return;
-        setFile(uploadedFile);
-        setQuestions(null);
-        setContext(null);
-        setQnaLoading(false);
-        const fileKey = getFileKey(uploadedFile);
-        if (viewMode === "answers" && qnaCache[fileKey]) {
-            setQuestions(qnaCache[fileKey].questions);
-            setContext(qnaCache[fileKey].context);
-        } else if (viewMode === "answers") {
-            setQnaLoading(true);
-            fetchData("answers", uploadedFile);
-        }
-    };
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, delay: 0.5 }}
+        className="flex flex-col md:flex-row gap-4 w-full max-w-md md:max-w-2xl justify-center"
+      >
+        <button
+          className="px-6 py-3 bg-blue-600 text-white rounded-2xl font-semibold text-lg shadow-lg hover:bg-blue-700 transition w-full md:w-auto"
+          onClick={() => setLoginOpen(true)}
+        >
+          Upload PDF
+        </button>
+        <button className="px-6 py-3 bg-gray-200 text-gray-900 rounded-2xl font-semibold text-lg shadow-lg hover:bg-gray-300 transition w-full md:w-auto dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700">
+          Learn More
+        </button>
+      </motion.div>
 
-    // Regenerate QnA when viewMode changes, using cache if available
-    useEffect(() => {
-        if (!file) return;
-        const fileKey = getFileKey(file);
-        if (viewMode === "answers") {
-            if (qnaCache[fileKey]) {
-                setQuestions(qnaCache[fileKey].questions);
-                setContext(qnaCache[fileKey].context);
-                setQnaLoading(false);
-            } else {
-                setQuestions(null);
-                setContext(null);
-                setQnaLoading(true);
-                fetchData("answers", file);
-            }
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [viewMode, file]);
-
-    // Check auth state on mount 
-    useEffect(() => {
-        const getUser = async () => {
-            const { data } = await supabase.auth.getUser();
-            setUser(data.user);
-        };
-        getUser();
-        const { data: listener } = supabase.auth.onAuthStateChange(
-            (_event, session) => {
-                setUser(session?.user ?? null);
-            }
-        );
-        return () => {
-            listener.subscription.unsubscribe();
-        };
-    }, []);
-
-        // Only fetch QnA when needed
-    const fetchData = async (mode: ViewMode, uploadedFile: File) => {
-        if (mode !== "answers") return;
-        try {
-            const formData = new FormData();
-            formData.append("file", uploadedFile);
-            if (user?.id) {
-                formData.append("user_id", user.id); // Add user_id to form
-            }
-            // Step 1: Extract text from PDF
-            const processRes = await fetch("/api/process-pdf", {
-                method: "POST",
-                body: formData,
-            });
-            if (!processRes.ok) throw new Error("Failed to process PDF");
-            const processData = await processRes.json();
-            // Step 2: Generate questions from extracted text
-            const questionsRes = await fetch("/api/questions", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    user_id: processData.user_id,
-                    title: processData.title,
-                    context: processData.context,
-                }),
-            });
-            if (!questionsRes.ok) throw new Error("Failed to generate questions");
-            const data = await questionsRes.json();
-            const fileKey = getFileKey(uploadedFile);
-            setQnaCache((prev) => ({
-                ...prev,
-                [fileKey]: { questions: data.questions, context: data.context },
-            }));
-            setQuestions(data.questions);
-            setContext(data.context);
-            setQnaLoading(false);
-        } catch (err) {
-            setQuestions(null);
-            setContext(null);
-            setQnaLoading(false);
-        }
-    };
-
-    return (
-        <div className="w-full max-w-4xl mx-auto min-h-96 border border-dashed bg-white dark:bg-black border-neutral-200 dark:border-neutral-800 rounded-lg p-4">
-            <div className="justify-center flex-row items-center text-center pb-5">
-                <div className="pr-2">
-                    <div className="pb-2 text-4xl font-bold dark:text-sky-200">
-                        Tutor-Flow{" "}
-                        <span className="text-xl text-gray-600">beta</span>
-                    </div>
-                    <div className="pb-2 text-gray-600 dark:text-gray-300 text-center">
-                        Upload your question paper as a parseable PDF to get
-                        instant summaries, important topics, and AI-generated
-                        Q&A,{" "}
-                        <span className="text-gray-950 dark:text-sky-200">all in one place</span>
-                    </div>
-                </div>
-                
-            </div>
-
-            <FileUpload onChange={handleFile} />
-            <div className="pb-2 text-gray-400 text-center">
-                Only supports parseable pdf files with scannable text for now.
-                (eg. Question Papers from University)
-            </div>
-
-
-            <div className="mb-7 mt-7">
-                <div className="flex gap-4 justify-center">
-                    <button
-                        onClick={() => setViewMode("summary")}
-                        className={`px-4 py-2 rounded-md ${
-                            viewMode === "summary"
-                                ? "bg-slate-900 text-white"
-                                : "bg-neutral-100 dark:bg-neutral-800"
-                        }`}
-                    >
-                        Summary
-                    </button>
-                    <button
-                        onClick={() => setViewMode("answers")}
-                        className={`px-4 py-2 rounded-md ${
-                            viewMode === "answers"
-                                ? "bg-slate-900 text-white"
-                                : "bg-neutral-100 dark:bg-neutral-800"
-                        }`}
-                    >
-                        Questions & Answers
-                    </button>
-                </div>
-            </div>
-
-            <SummaryFromFile
-                file={file}
-                viewMode={viewMode}
-                summaryCache={summaryCache}
-                setSummaryCache={setSummaryCache}
-            />
-            {viewMode === "answers" &&
-                (qnaLoading ? (
-                    <p className="mt-2 text-center">Processing PDF...</p>
-                ) : questions && context ? (
-                    <Answers initialQuestions={questions} context={context} />
-                ) : null)}
+      {/* Features Section */}
+      <motion.section
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7, delay: 0.9 }}
+        className="mt-16 md:mt-20 grid gap-6 md:gap-8 grid-cols-1 md:grid-cols-3 w-full max-w-5xl"
+      >
+        <div className="bg-white/80 dark:bg-white/5 rounded-2xl p-6 shadow flex flex-col items-center">
+          <span className="text-3xl mb-3">📄</span>
+          <h2 className="font-bold text-lg text-gray-900 dark:text-white mb-2">Easy Uploads</h2>
+          <p className="text-gray-600 dark:text-gray-300 text-center">
+            Upload any university PDF and get started instantly.
+          </p>
         </div>
-    );
+        <div className="bg-white/80 dark:bg-white/5 rounded-2xl p-6 shadow flex flex-col items-center">
+          <span className="text-3xl mb-3">🧠</span>
+          <h2 className="font-bold text-lg text-gray-900 dark:text-white mb-2">Smart Summaries</h2>
+          <p className="text-gray-600 dark:text-gray-300 text-center">
+            AI summarizes key concepts and topics in seconds.
+          </p>
+        </div>
+        <div className="bg-white/80 dark:bg-white/5 rounded-2xl p-6 shadow flex flex-col items-center">
+          <span className="text-3xl mb-3">❓</span>
+          <h2 className="font-bold text-lg text-gray-900 dark:text-white mb-2">Q&A Generator</h2>
+          <p className="text-gray-600 dark:text-gray-300 text-center">
+            Instantly generate exam-style questions and answers.
+          </p>
+        </div>
+      </motion.section>
+
+      {/* TODO: Replace or expand below with testimonials, pricing, or other info */}
+      <motion.section
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7, delay: 1.3 }}
+        className="mt-16 md:mt-24 text-center max-w-3xl"
+      >
+        <h2 className="text-2xl text-gray-900 dark:text-white font-bold mb-4">
+          {/* TODO: Section Title, e.g., "Why Choose Tutor-Flow?" */}
+        </h2>
+        <p className="text-gray-600 dark:text-gray-300 mb-2">
+          {/* TODO: Add some compelling points, user testimonials, or more features here */}
+        </p>
+      </motion.section>
+
+      <LoginModal
+        open={loginOpen}
+        setOpen={setLoginOpen}
+        switchToSignup={() => {
+          setLoginOpen(false);
+          setSignupOpen(true);
+        }}
+      />
+      <SignupModal
+        open={signupOpen}
+        setOpen={setSignupOpen}
+        switchToLogin={() => {
+          setSignupOpen(false);
+          setLoginOpen(true);
+        }}
+      />
+    </main>
+  );
 }
